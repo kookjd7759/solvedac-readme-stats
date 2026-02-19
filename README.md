@@ -5,8 +5,11 @@
 ![Next.js](https://img.shields.io/badge/Next.js-13+-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178C6)
   
-> 📊 Display your solved.ac stats beautifully in your GitHub README  
-> Inspired by github-readme-stats, powered by the solved.ac API  
+solved.ac 공개 API를 기반으로 GitHub README용 동적 SVG 통계 카드를 생성하는 프로젝트입니다.  
+알고리즘 활동을 직관적으로 시각화하기 위한 확장형 카드 시스템을 목표로 개발 중입니다.  
+  
+📊 Display your solved.ac stats beautifully in your GitHub README  
+Inspired by github-readme-stats, powered by the solved.ac API  
 > ⚠️ This project is currently in early development (Demo / Experimental).
 > Features and API may change.
 
