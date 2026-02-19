@@ -1,5 +1,5 @@
 
-![Donggyun's solved ac stats](https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759)
+[![Donggyun's solved ac stats](https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759)](https://solved.ac/en/profile/kookjd7759)
 
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
