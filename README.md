@@ -13,7 +13,6 @@ Inspired by github-readme-stats, powered by the solved.ac API
 > ⚠️ This project is currently in early development (Demo / Experimental).
 > Features and API may change.
 
-
 [![Donggyun's solved ac stats](https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759)](https://solved.ac/en/profile/kookjd7759)
 
 ## 📌 About This Project
@@ -26,7 +25,9 @@ directly inside their GitHub profile.
 This project was built to create a customizable and aesthetic alternative to existing solved.ac badges.  
 
 ## 🛠 Usage  
-Add this to your GitHub README:
+Add this to your GitHub README:  
+> Replace `{username}` with your solved.ac (BOJ) handle(ID).  
+
 ```markdown
 [![Donggyun's solved ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://github.com/kookjd7759/solvedac-readme-stats)
 ```
