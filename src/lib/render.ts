@@ -41,6 +41,7 @@ export function renderCard(input: RenderInput) {
   const W = 560;
   const H = 220;
   const R = 18;
+  const PAD = 33; // 바깥 패딩
 
   const topH = 92;
 
@@ -152,7 +153,9 @@ export function renderCard(input: RenderInput) {
     hasClassIcon ? iconPill(curX, tagY, input.classDataUri!, `Class ${clazz || ""}`.trim()) : "";
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+<svg width="${W + PAD * 2}" height="${H + PAD * 2}"
+     viewBox="-${PAD} -${PAD} ${W + PAD * 2} ${H + PAD * 2}"
+     xmlns="http://www.w3.org/2000/svg">
   <defs>
     <clipPath id="clipCard">
       <rect x="0" y="0" width="${W}" height="${H}" rx="${R}"/>
@@ -168,7 +171,7 @@ export function renderCard(input: RenderInput) {
 
     <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#F8FAFC"/>
+      <stop offset="100%" stop-color="#F3F6FB"/>
     </linearGradient>
 
     <linearGradient id="triFallback" x1="0" y1="0" x2="1" y2="1">
@@ -176,9 +179,14 @@ export function renderCard(input: RenderInput) {
       <stop offset="100%" stop-color="#60A5FA" stop-opacity="0.18"/>
     </linearGradient>
 
-    <filter id="shadow" x="-25%" y="-25%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0F172A" flood-opacity="0.10"/>
+    <filter id="shadow"
+        filterUnits="userSpaceOnUse"
+        x="${-(PAD + 60)}" y="${-(PAD + 60)}"
+        width="${W + (PAD + 60) * 2}" height="${H + (PAD + 60) * 2}">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0F172A" flood-opacity="0.12"/>
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0F172A" flood-opacity="0.06"/>
     </filter>
+
 
     <filter id="avatarShadow" x="-25%" y="-25%" width="160%" height="160%">
       <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0F172A" flood-opacity="0.14"/>
@@ -206,6 +214,18 @@ export function renderCard(input: RenderInput) {
       <line x1="${kneeX}" y1="${kneeY}" x2="${W}" y2="${kneeY}" stroke="#E2E8F0" stroke-width="2" opacity="0.9"/>
 
       <line x1="18" y1="${topH}" x2="${W - 18}" y2="${topH}" stroke="#EEF2F7"/>
+
+      <!-- ✅ card border (inside clip) -->
+      <rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="${R - 0.5}"
+            fill="none" stroke="#d4d4d4" stroke-opacity="0.95"/>
+
+      <!-- ✅ subtle inner highlight (top-left shine) -->
+      <path d="M ${R} 1 H ${W - R} 
+              C ${W - R/2} 1 ${W - 1} ${R/2} ${W - 1} ${R}
+              V ${Math.round(topH * 0.55)} 
+              C ${Math.round(W * 0.66)} ${Math.round(topH * 0.38)} ${Math.round(W * 0.40)} ${Math.round(topH * 0.28)} ${R} ${Math.round(topH * 0.22)}
+              Z"
+            fill="#FFFFFF" opacity="0.22"/>
     </g>
   </g>
 
@@ -236,8 +256,6 @@ export function renderCard(input: RenderInput) {
   <!-- Rows -->
   ${row("Solved", `${solved}`, rowsTop)}
   ${row("Rank", rank ? `#${rank}` : "-", rowsTop + (rowH + rowGap) * 1)}
-  ${row("Class", clazz ? `${clazz}` : "-", rowsTop + (rowH + rowGap) * 2)}
-  ${row("Max streak", `${streak}`, rowsTop + (rowH + rowGap) * 3)}
 </svg>`;
 }
 
@@ -246,12 +264,18 @@ export function renderErrorCard(msg: string) {
   const W = 560;
   const H = 140;
   const R = 18;
+  const PAD = 33; // 바깥 패딩
   const font = "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+<svg width="${W + PAD * 2}" height="${H + PAD * 2}"
+     viewBox="0 0 ${W + PAD * 2} ${H + PAD * 2}"
+     xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="shadow" x="-25%" y="-25%" width="160%" height="160%">
+    <filter id="shadow"
+        filterUnits="userSpaceOnUse"
+        x="${-(PAD + 60)}" y="${-(PAD + 60)}"
+        width="${W + (PAD + 60) * 2}" height="${H + (PAD + 60) * 2}">
       <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0F172A" flood-opacity="0.10"/>
     </filter>
   </defs>
