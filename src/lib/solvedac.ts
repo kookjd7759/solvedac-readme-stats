@@ -1,7 +1,19 @@
 export type SolvedUser = {
   handle: string;
   tier: number;
+
   solvedCount?: number;
+  rank?: number;
+
+  class?: number;
+  classDecoration?: string;
+
+  profileImageUrl?: string | null;
+
+  // user/show에 실제로 내려오는 값들
+  backgroundId?: string | null;
+  badgeId?: string | null;
+
   maxStreak?: number;
 };
 
