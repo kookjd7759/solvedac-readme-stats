@@ -180,17 +180,24 @@ export function renderCard(input: RenderInput) {
     </linearGradient>
 
     <filter id="shadow"
-        filterUnits="userSpaceOnUse"
-        x="${-(PAD + 60)}" y="${-(PAD + 60)}"
-        width="${W + (PAD + 60) * 2}" height="${H + (PAD + 60) * 2}">
-      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0F172A" flood-opacity="0.12"/>
-      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0F172A" flood-opacity="0.06"/>
+      filterUnits="userSpaceOnUse"
+      x="${-(PAD + 70)}" y="${-(PAD + 70)}"
+      width="${W + (PAD + 70) * 2}" height="${H + (PAD + 70) * 2}">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#0F172A" flood-opacity="0.14"/>
+      <feDropShadow dx="0" dy="4"  stdDeviation="6"  flood-color="#0F172A" flood-opacity="0.08"/>
+      <feDropShadow dx="0" dy="1"  stdDeviation="1.5" flood-color="#0F172A" flood-opacity="0.10"/>
     </filter>
-
 
     <filter id="avatarShadow" x="-25%" y="-25%" width="160%" height="160%">
       <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0F172A" flood-opacity="0.14"/>
     </filter>
+
+    <radialGradient id="shine" cx="0.18" cy="0.08" r="0.9">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.75"/>
+      <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
   </defs>
 
   <g filter="url(#shadow)">
@@ -217,7 +224,7 @@ export function renderCard(input: RenderInput) {
 
       <!-- ✅ card border (inside clip) -->
       <rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="${R - 0.5}"
-            fill="none" stroke="#d4d4d4" stroke-opacity="0.95"/>
+            fill="none" stroke="#E5E7EB" stroke-opacity="0.65"/>
 
       <!-- ✅ subtle inner highlight (top-left shine) -->
       <path d="M ${R} 1 H ${W - R} 
@@ -225,7 +232,7 @@ export function renderCard(input: RenderInput) {
               V ${Math.round(topH * 0.55)} 
               C ${Math.round(W * 0.66)} ${Math.round(topH * 0.38)} ${Math.round(W * 0.40)} ${Math.round(topH * 0.28)} ${R} ${Math.round(topH * 0.22)}
               Z"
-            fill="#FFFFFF" opacity="0.22"/>
+            fill="url(#shine)"/>
     </g>
   </g>
 
@@ -273,10 +280,12 @@ export function renderErrorCard(msg: string) {
      xmlns="http://www.w3.org/2000/svg">
   <defs>
     <filter id="shadow"
-        filterUnits="userSpaceOnUse"
-        x="${-(PAD + 60)}" y="${-(PAD + 60)}"
-        width="${W + (PAD + 60) * 2}" height="${H + (PAD + 60) * 2}">
-      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0F172A" flood-opacity="0.10"/>
+      filterUnits="userSpaceOnUse"
+      x="${-(PAD + 70)}" y="${-(PAD + 70)}"
+      width="${W + (PAD + 70) * 2}" height="${H + (PAD + 70) * 2}">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#0F172A" flood-opacity="0.14"/>
+      <feDropShadow dx="0" dy="4"  stdDeviation="6"  flood-color="#0F172A" flood-opacity="0.08"/>
+      <feDropShadow dx="0" dy="1"  stdDeviation="1.5" flood-color="#0F172A" flood-opacity="0.10"/>
     </filter>
   </defs>
   <g filter="url(#shadow)">
