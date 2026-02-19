@@ -26,7 +26,7 @@ This project was built to create a customizable and aesthetic alternative to exi
 
 ## 🛠 Usage  
 Add this to your GitHub README:  
-> Replace `{username}` with your solved.ac (BOJ) handle(ID).
+> Replace `{username}` with your solved.ac (BOJ) handle(ID).  
 > 아래와 같이 작성하며, `{username}`에 자신의 solved.ac 핸들(아이디)을 입력하여 사용하세요.
 
 ```markdown
