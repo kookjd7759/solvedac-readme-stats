@@ -12,10 +12,12 @@ function esc(s: string) {
 type RenderInput = {
   user: SolvedUser;
 
-  tierDataUri: string;   // data:image/svg+xml;base64,...
-  avatarDataUri: string; // data:image/*;base64,... (없으면 "")
-  bgDataUri: string;     // data:image/*;base64,... (없으면 "")
-  badgeDataUri: string;  // optional (현재 레이아웃엔 미사용)
+  tierDataUri: string;
+  avatarDataUri: string;
+  bgDataUri: string;
+
+  badgeDataUri: string; // 설정 뱃지 (있으면)
+  classDataUri?: string; // ✅ NEW: 클래스 아이콘(data uri) (없으면 ""/undefined)
 
   accentColor?: string;
 };
@@ -24,7 +26,6 @@ export function renderCard(input: RenderInput) {
   const u = input.user;
 
   const handle = esc(u.handle || "");
-  const tier = u.tier ?? 0;
   const solved = u.solvedCount ?? 0;
   const rank = (u as any).rank ?? 0;
   const clazz = (u as any).class ?? 0;
@@ -33,12 +34,14 @@ export function renderCard(input: RenderInput) {
   const hasAvatar = !!input.avatarDataUri;
   const hasBg = !!input.bgDataUri;
 
+  const hasBadge = !!input.badgeDataUri;
+  const hasClassIcon = !!(input.classDataUri && input.classDataUri.trim().length > 0);
+
   // ===== Layout =====
   const W = 560;
   const H = 220;
   const R = 18;
 
-  // Top composition
   const topH = 92;
 
   // Avatar
@@ -47,16 +50,34 @@ export function renderCard(input: RenderInput) {
   const avatarCx = 56;
   const avatarCy = 46;
 
-  // Name line (under avatar area)
+  // Name line
   const nameX = 18;
   const nameY = topH + 34;
 
   // Tier icon next to name
   const tierSize = 18;
   const tierX = nameX;
-  const tierY = topH + 18; // 이미지 y는 top-left 기준이라 약간 위
+  const tierY = topH + 18;
 
   const textX = nameX + tierSize + 8;
+
+  // ✅ NEW: name + badges
+  const tagH = 18;
+  const tagR = 9;
+  const tagGap = 6;
+
+  // 배지/클래스 아이콘 크기
+  const badgeIcon = 14;
+  const classIcon = 14;
+
+  // 닉네임 오른쪽 시작 위치: 대충 텍스트 뒤로 충분히 떨어뜨리기
+  // (SVG에서 텍스트 실제 폭 측정이 어려워서, handle 길이에 따라 보정)
+  // 평균 폰트 18px에서 글자폭 ~ 9~10px 정도로 잡고 + 여유
+  const approxNameW = Math.min(280, 10 * handle.length + 8);
+  const tagsX = textX + approxNameW + 10;
+
+  const font = "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
+  const accent = input.accentColor || "#3ef0b1";
 
   // Stats rows (4 lines)
   const rowsTop = topH + 58;
@@ -66,13 +87,9 @@ export function renderCard(input: RenderInput) {
   const rightPad = 18;
   const rowW = W - leftPad - rightPad;
 
-  const font = "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
-  const accent = input.accentColor || "#3ef0b1";
-
   function row(label: string, value: string, y: number) {
     const L = esc(label);
     const V = esc(value);
-    // borderless: tint background + 아주 옅은 divider
     return `
       <g>
         <rect x="${leftPad}" y="${y}" width="${rowW}" height="${rowH}" rx="12" fill="#F8FAFC"/>
@@ -86,9 +103,53 @@ export function renderCard(input: RenderInput) {
     `;
   }
 
-  // Triangular clip for background (diagonal split)
-  // Triangle points: (W*0.38, 0) -> (W, 0) -> (W, topH)
-  const triX = Math.round(W * 0.36);
+  // Diagonal bg
+  const triX = Math.round(W * 0.29);
+  const kneeY = Math.round(topH * 1.0);
+  const kneeX = Math.round(W * 0.60);
+
+  // ✅ NEW: tags 렌더러
+  function badgePill(x: number, y: number, w: number, iconHref: string, label: string) {
+    const safe = esc(label);
+    return `
+      <g>
+        <rect x="${x}" y="${y - tagH + 3}" width="${w}" height="${tagH}" rx="${tagR}" fill="#F1F5F9"/>
+        <image href="${iconHref}" x="${x + 6}" y="${y - tagH + 5}" width="${badgeIcon}" height="${badgeIcon}"/>
+        <text x="${x + 6 + badgeIcon + 6}" y="${y}" fill="#334155" font-size="11" font-weight="800" font-family="${font}">
+          ${safe}
+        </text>
+      </g>
+    `;
+  }
+
+  function iconPill(x: number, y: number, iconHref: string, title: string) {
+    const safe = esc(title);
+    const w = 32;
+    return `
+      <g>
+        <rect x="${x}" y="${y - tagH + 3}" width="${w}" height="${tagH}" rx="${tagR}" fill="#F1F5F9"/>
+        <image href="${iconHref}" x="${x + 9}" y="${y - tagH + 5}" width="${classIcon}" height="${classIcon}"/>
+        <title>${safe}</title>
+      </g>
+    `;
+  }
+
+  // 배지 라벨은 너무 길면 과한데, 기본은 "Badge"
+  // 원하면 route에서 실제 badge 이름을 따서 label로 넘겨도 됨.
+  const badgeLabel = "Badge";
+
+  // pill 너비 계산(텍스트 길이 기반 근사)
+  const badgeW = 6 + badgeIcon + 6 + Math.min(110, badgeLabel.length * 7 + 18) + 10;
+
+  const tagY = nameY; // 텍스트 baseline과 맞춤
+
+  let curX = tagsX;
+
+  const badgeMarkup = hasBadge ? badgePill(curX, tagY, badgeW, input.badgeDataUri, badgeLabel) : "";
+  if (hasBadge) curX += badgeW + tagGap;
+
+  const classMarkup =
+    hasClassIcon ? iconPill(curX, tagY, input.classDataUri!, `Class ${clazz || ""}`.trim()) : "";
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
@@ -102,7 +163,7 @@ export function renderCard(input: RenderInput) {
     </clipPath>
 
     <clipPath id="clipBgTri">
-      <polygon points="${triX},0 ${W},0 ${W},${topH}"/>
+      <polygon points="${triX},0 ${W},0 ${W},${kneeY} ${kneeX},${kneeY}"/>
     </clipPath>
 
     <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
@@ -124,36 +185,31 @@ export function renderCard(input: RenderInput) {
     </filter>
   </defs>
 
-  <!-- Card -->
   <g filter="url(#shadow)">
     <g clip-path="url(#clipCard)">
       <rect x="0" y="0" width="${W}" height="${H}" rx="${R}" fill="url(#base)"/>
 
-      <!-- Top-left area base (clean) -->
-      <rect x="0" y="0" width="${W}" height="${topH}" fill="#FFFFFF"/>
+      <polygon points="0,0 ${triX},0 ${kneeX},${kneeY} 0,${kneeY}" fill="#FFFFFF"/>
 
-      <!-- Diagonal background triangle on the back -->
       <g clip-path="url(#clipBgTri)">
-        <rect x="${triX}" y="0" width="${W - triX}" height="${topH}" fill="url(#triFallback)"/>
+        <rect x="${triX}" y="0" width="${W - triX}" height="${kneeY}" fill="url(#triFallback)"/>
         ${
           hasBg
-            ? `<image href="${input.bgDataUri}" x="${triX}" y="0" width="${W - triX}" height="${topH}"
-                     preserveAspectRatio="xMidYMid slice"/>`
+            ? `<image href="${input.bgDataUri}" x="${triX}" y="0" width="${W - triX}" height="${kneeY}"
+                    preserveAspectRatio="xMidYMid slice"/>`
             : ""
         }
-        <!-- subtle overlay to keep it classy -->
-        <rect x="${triX}" y="0" width="${W - triX}" height="${topH}" fill="#0F172A" opacity="0.06"/>
+        <rect x="${triX}" y="0" width="${W - triX}" height="${kneeY}" fill="#0F172A" opacity="0.06"/>
       </g>
 
-      <!-- Diagonal separator line (single, clean) -->
-      <line x1="${triX}" y1="0" x2="${W}" y2="${topH}" stroke="#E2E8F0" stroke-width="2" opacity="0.9"/>
+      <line x1="${triX}" y1="0" x2="${kneeX}" y2="${kneeY}" stroke="#E2E8F0" stroke-width="2" opacity="0.9"/>
+      <line x1="${kneeX}" y1="${kneeY}" x2="${W}" y2="${kneeY}" stroke="#E2E8F0" stroke-width="2" opacity="0.9"/>
 
-      <!-- Subtle top-bottom divider -->
       <line x1="18" y1="${topH}" x2="${W - 18}" y2="${topH}" stroke="#EEF2F7"/>
     </g>
   </g>
 
-  <!-- Avatar (top-left) -->
+  <!-- Avatar -->
   <g filter="url(#avatarShadow)">
     <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarR + 3}" fill="#FFFFFF"/>
     <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarR + 2}" fill="none" stroke="#E5E7EB"/>
@@ -167,13 +223,17 @@ export function renderCard(input: RenderInput) {
     }
   </g>
 
-  <!-- Tier + Handle line (under topH) -->
+  <!-- Tier + Handle -->
   <image href="${input.tierDataUri}" x="${tierX}" y="${tierY}" width="${tierSize}" height="${tierSize}"/>
   <text x="${textX}" y="${nameY}" fill="#0F172A" font-size="18" font-weight="900" font-family="${font}">
     ${handle}
   </text>
 
-  <!-- Stats rows (4 lines) -->
+  <!-- ✅ NEW: Handle 오른쪽에 badge + class -->
+  ${badgeMarkup}
+  ${classMarkup}
+
+  <!-- Rows -->
   ${row("Solved", `${solved}`, rowsTop)}
   ${row("Rank", rank ? `#${rank}` : "-", rowsTop + (rowH + rowGap) * 1)}
   ${row("Class", clazz ? `${clazz}` : "-", rowsTop + (rowH + rowGap) * 2)}

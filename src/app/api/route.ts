@@ -1,8 +1,7 @@
 export const runtime = "edge";
 
 import { fetchSolvedUser } from "@/lib/solvedac";
-import * as basic from "@/lib/render_basic";
-import * as v1 from "@/lib/render_v1";
+import * as basic from "@/lib/render";
 
 const OK_HEADERS: Record<string, string> = {
   "Content-Type": "image/svg+xml",
@@ -60,30 +59,23 @@ async function resolveBackgroundImageUrl(backgroundId: string): Promise<string> 
   if (urls.length === 0) throw new Error(`background image url not found for ${backgroundId}`);
 
   // 점수로 "가장 큰 이미지" 추정해서 선택
-  // 1) 경로에 1234x567 같은 사이즈가 있으면 면적 큰 것 우선
-  // 2) 사이즈가 없으면 "profile/"(저해상도) 보다 다른 경로를 더 선호
   function score(url: string) {
     const m = url.match(/\/(\d{2,4})x(\d{2,4})\//i);
     if (m) {
       const w = Number(m[1]);
       const h = Number(m[2]);
-      return w * h; // 면적
+      return w * h;
     }
-    // 사이즈 표기가 없으면 보통 그쪽이 더 큰 원본/상위 프리뷰인 경우가 많아서 가산점
     let s = 1_000_000_000;
-    // profile/은 대체로 미리보기라 감점
     if (url.includes("/profile/")) s -= 200_000_000;
     return s;
   }
 
-  const best = urls
-    .map((u) => u)
-    .sort((a, b) => score(b) - score(a))[0];
+  const best = urls.sort((a, b) => score(b) - score(a))[0]!;
 
   BG_URL_CACHE.set(backgroundId, best);
   return best;
 }
-
 
 async function tryFetchDataUri(url: string, forcedMime?: string) {
   try {
@@ -101,12 +93,6 @@ export async function GET(req: Request) {
     return new Response(basic.renderErrorCard("missing ?handle=..."), { headers: ERR_HEADERS });
   }
 
-  // ✅ theme 처리
-  // - 기본: basic
-  // - theme=v1 이면 v1 렌더
-  const theme = (searchParams.get("theme") || "basic").trim().toLowerCase();
-  const renderer = theme === "v1" ? v1 : basic;
-
   try {
     const u = await fetchSolvedUser(handle);
 
@@ -117,15 +103,14 @@ export async function GET(req: Request) {
 
     // Avatar: null이면 default_profile 사용
     const avatarUrl = u.profileImageUrl ?? "https://static.solved.ac/misc/360x360/default_profile.png";
-    const avatarDataUri = await fetchAsDataUri(avatarUrl, "image/png"); // octet-stream 방지
+    const avatarDataUri = await fetchAsDataUri(avatarUrl, "image/png");
 
-    // ✅ Background: backgroundId 기반으로 실제 이미지 URL 파싱해서 로딩
+    // Background (optional)
     let bgDataUri = "";
     const bgId = (u as any).backgroundId as string | undefined;
     if (bgId) {
       try {
         const bgUrl = await resolveBackgroundImageUrl(bgId);
-        // solved.ac 쪽이 octet-stream 주는 케이스 많아서 확장자 기반 forcedMime
         const lower = bgUrl.toLowerCase();
         const mime =
           lower.endsWith(".png") ? "image/png" :
@@ -137,8 +122,7 @@ export async function GET(req: Request) {
       }
     }
 
-    // ✅ Badge: 실제 응답은 string (ex: solves_03000)
-    // 정적 파일 경로가 환경에 따라 다를 수 있어서 후보를 몇 개 순서대로 시도
+    // Badge (optional)
     let badgeDataUri = "";
     const badgeId = (u as any).badgeId as string | undefined;
     if (badgeId) {
@@ -152,16 +136,21 @@ export async function GET(req: Request) {
       }
     }
 
-    // v1 테마에서 색상 쓸 수 있게(없어도 됨)
-    const accentColor = "#3ef0b1";
+    // 지금은 class 아이콘은 미사용(렌더 타입 맞추기용)
+    const classDataUri = "";
 
-    const svg =
-      theme === "v1"
-        ? v1.renderCard({ user: u, tierDataUri, avatarDataUri, bgDataUri, badgeDataUri, accentColor })
-        : basic.renderCard({ user: u, tierDataUri, avatarDataUri, bgDataUri, badgeDataUri });
+    // ✅ 무조건 basic.renderCard만 사용
+    const svg = basic.renderCard({
+      user: u,
+      tierDataUri,
+      avatarDataUri,
+      bgDataUri,
+      badgeDataUri,
+      classDataUri,
+    });
 
     return new Response(svg, { headers: OK_HEADERS });
   } catch (e: any) {
-    return new Response(renderer.renderErrorCard(e?.message || "unknown error"), { headers: ERR_HEADERS });
+    return new Response(basic.renderErrorCard(e?.message || "unknown error"), { headers: ERR_HEADERS });
   }
 }
