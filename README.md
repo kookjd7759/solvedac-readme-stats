@@ -1,10 +1,53 @@
 
+# 🚀 solvedac-readme-stats  
+![Status](https://img.shields.io/badge/status-early%20access-orange)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Next.js](https://img.shields.io/badge/Next.js-13+-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178C6)
+  
+> 📊 Display your solved.ac stats beautifully in your GitHub README  
+> Inspired by github-readme-stats, powered by the solved.ac API  
+> ⚠️ This project is currently in early development (Demo / Experimental).
+> Features and API may change.
+
+
 [![Donggyun's solved ac stats](https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759)](https://solved.ac/en/profile/kookjd7759)
 
+## 📌 About This Project
+solvedac-readme-stats is a dynamic GitHub README card generator  
+that fetches real-time data from solved.ac and renders it as an SVG image.  
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+It allows developers to showcase their algorithm-solving achievements  
+directly inside their GitHub profile.  
 
-## Getting Started
+This project was built to create a customizable and aesthetic alternative to existing solved.ac badges.  
+
+## 🛠 Usage  
+Add this to your GitHub README:
+```markdown
+[![Donggyun's solved ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://github.com/kookjd7759/solvedac-readme-stats)
+```
+Example:
+```markdown
+[![Donggyun's solved ac stats](https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759)](https://github.com/kookjd7759/solvedac-readme-stats)
+```
+
+## 🚀 Deploy Your Own  
+- Fork  
+- Deploy to Vercel  
+- Use your own endpoint
+
+## 🧠 About solved.ac  
+solved.ac is a competitive programming profile service built on  
+Baekjoon Online Judge (BOJ).  
+  
+It analyzes solved problems and assigns a tier rating (Bronze → Ruby)  
+to measure problem-solving skills.  
+  
+This project uses the solved.ac public API to render those stats  
+as dynamic SVG cards for GitHub READMEs.  
+  
+## 🧑‍💻 Development
 
 First, run the development server:
 
@@ -24,17 +67,7 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+## 📄 License
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Distributed under the MIT License.  
+See `LICENSE` for more information.
