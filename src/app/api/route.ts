@@ -5,7 +5,7 @@ import * as basic from "@/lib/render";
 
 const OK_HEADERS: Record<string, string> = {
   "Content-Type": "image/svg+xml",
-  "Cache-Control": "public, max-age=0, s-maxage=21600, stale-while-revalidate=86400",
+  "Cache-Control": "public, max-age=0, s-maxage=900, stale-while-revalidate=86400",
 };
 
 const ERR_HEADERS: Record<string, string> = {
