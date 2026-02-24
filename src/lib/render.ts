@@ -111,18 +111,12 @@ export function renderCard(input: RenderInput) {
 
   // ✅ badge overlay (bottom-right)
   const badgeSize = 50;     // 크기 (원하면 64~88 사이로 조절)
-  const badgeX = avatarCx + avatarR - badgeSize / 2 + 40;
-  const badgeY = avatarCy + avatarR - badgeSize / 2 - 30;
+  const badgeX = avatarCx + avatarR - badgeSize / 2 + 40; // 40 만큼 오른쪽 이동 
+  const badgeY = avatarCy + avatarR - badgeSize / 2 - 20; // 20 만큼 위쪽 이동
 
   const badgeOverlay = hasBadge
     ? `
       <g>
-        <!-- 배지 뒤 흰색 테두리(가독성) -->
-        <circle cx="${badgeX + badgeSize / 2}" cy="${badgeY + badgeSize / 2}" r="${badgeSize / 2 + 2}"
-                fill="#FFFFFF" opacity="0.95"/>
-        <!-- 아주 약한 그림자 -->
-        <circle cx="${badgeX + badgeSize / 2}" cy="${badgeY + badgeSize / 2}" r="${badgeSize / 2 + 2}"
-                fill="#000" opacity="0.08"/>
         <image href="${input.badgeDataUri}"
               x="${badgeX}" y="${badgeY}"
               width="${badgeSize}" height="${badgeSize}"

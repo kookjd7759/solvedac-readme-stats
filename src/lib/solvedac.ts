@@ -10,7 +10,6 @@ export type SolvedUser = {
 
   profileImageUrl?: string | null;
 
-  // user/show에 실제로 내려오는 값들
   backgroundId?: string | null;
   badgeId?: string | null;
 
