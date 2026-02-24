@@ -125,21 +125,23 @@ export async function GET(req: Request) {
     // Badge (optional)
     let badgeDataUri = "";
     const badgeId = (u as any).badgeId as string | undefined;
+
     if (badgeId) {
-      const candidates = [
-        `https://static.solved.ac/profile_badge/${badgeId}.svg`,
-        `https://static.solved.ac/badges/${badgeId}.svg`,
-      ];
-      for (const url of candidates) {
-        badgeDataUri = await tryFetchDataUri(url, "image/svg+xml");
-        if (badgeDataUri) break;
-      }
+      const url = `https://static.solved.ac/profile_badge/120x120/${badgeId}.png`
+      
+      const lower = url.toLowerCase();
+      const forcedMime =
+        lower.endsWith(".svg") ? "image/svg+xml" :
+        lower.endsWith(".webp") ? "image/webp" :
+        lower.endsWith(".png") ? "image/png" :
+        undefined;
+
+      badgeDataUri = await tryFetchDataUri(url, forcedMime);
     }
 
-    // 지금은 class 아이콘은 미사용(렌더 타입 맞추기용)
+
     const classDataUri = "";
 
-    // ✅ 무조건 basic.renderCard만 사용
     const svg = basic.renderCard({
       user: u,
       tierDataUri,

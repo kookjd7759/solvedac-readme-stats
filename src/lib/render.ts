@@ -109,19 +109,29 @@ export function renderCard(input: RenderInput) {
   const kneeY = Math.round(topH * 1.0);
   const kneeX = Math.round(W * 0.60);
 
-  // ✅ NEW: tags 렌더러
-  function badgePill(x: number, y: number, w: number, iconHref: string, label: string) {
-    const safe = esc(label);
-    return `
+  // ✅ badge overlay (bottom-right)
+  const badgeSize = 50;     // 크기 (원하면 64~88 사이로 조절)
+  const badgeX = avatarCx + avatarR - badgeSize / 2 + 40;
+  const badgeY = avatarCy + avatarR - badgeSize / 2 - 30;
+
+  const badgeOverlay = hasBadge
+    ? `
       <g>
-        <rect x="${x}" y="${y - tagH + 3}" width="${w}" height="${tagH}" rx="${tagR}" fill="#F1F5F9"/>
-        <image href="${iconHref}" x="${x + 6}" y="${y - tagH + 5}" width="${badgeIcon}" height="${badgeIcon}"/>
-        <text x="${x + 6 + badgeIcon + 6}" y="${y}" fill="#334155" font-size="11" font-weight="800" font-family="${font}">
-          ${safe}
-        </text>
+        <!-- 배지 뒤 흰색 테두리(가독성) -->
+        <circle cx="${badgeX + badgeSize / 2}" cy="${badgeY + badgeSize / 2}" r="${badgeSize / 2 + 2}"
+                fill="#FFFFFF" opacity="0.95"/>
+        <!-- 아주 약한 그림자 -->
+        <circle cx="${badgeX + badgeSize / 2}" cy="${badgeY + badgeSize / 2}" r="${badgeSize / 2 + 2}"
+                fill="#000" opacity="0.08"/>
+        <image href="${input.badgeDataUri}"
+              x="${badgeX}" y="${badgeY}"
+              width="${badgeSize}" height="${badgeSize}"
+              preserveAspectRatio="xMidYMid meet"
+              style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));"/>
       </g>
-    `;
-  }
+    `
+    : "";
+
 
   function iconPill(x: number, y: number, iconHref: string, title: string) {
     const safe = esc(title);
@@ -135,19 +145,8 @@ export function renderCard(input: RenderInput) {
     `;
   }
 
-  // 배지 라벨은 너무 길면 과한데, 기본은 "Badge"
-  // 원하면 route에서 실제 badge 이름을 따서 label로 넘겨도 됨.
-  const badgeLabel = "Badge";
-
-  // pill 너비 계산(텍스트 길이 기반 근사)
-  const badgeW = 6 + badgeIcon + 6 + Math.min(110, badgeLabel.length * 7 + 18) + 10;
-
-  const tagY = nameY; // 텍스트 baseline과 맞춤
-
+  const tagY = nameY;
   let curX = tagsX;
-
-  const badgeMarkup = hasBadge ? badgePill(curX, tagY, badgeW, input.badgeDataUri, badgeLabel) : "";
-  if (hasBadge) curX += badgeW + tagGap;
 
   const classMarkup =
     hasClassIcon ? iconPill(curX, tagY, input.classDataUri!, `Class ${clazz || ""}`.trim()) : "";
@@ -257,12 +256,14 @@ export function renderCard(input: RenderInput) {
   </text>
 
   <!-- ✅ NEW: Handle 오른쪽에 badge + class -->
-  ${badgeMarkup}
   ${classMarkup}
 
   <!-- Rows -->
   ${row("Solved", `${solved}`, rowsTop)}
   ${row("Rank", rank ? `#${rank}` : "-", rowsTop + (rowH + rowGap) * 1)}
+
++  <!-- ✅ Badge bottom-right overlay -->
++  ${badgeOverlay}
 </svg>`;
 }
 
