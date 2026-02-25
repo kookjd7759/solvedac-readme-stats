@@ -187,9 +187,9 @@ export function renderCard(input: RenderInput) {
       filterUnits="userSpaceOnUse"
       x="${-(PAD + 70)}" y="${-(PAD + 70)}"
       width="${W + (PAD + 70) * 2}" height="${H + (PAD + 70) * 2}">
-      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#0F172A" flood-opacity="0.14"/>
-      <feDropShadow dx="0" dy="4"  stdDeviation="6"  flood-color="#0F172A" flood-opacity="0.08"/>
-      <feDropShadow dx="0" dy="1"  stdDeviation="1.5" flood-color="#0F172A" flood-opacity="0.10"/>
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#0F172A" flood-opacity="0.14"/>
+      <feDropShadow dx="0" dy="3"  stdDeviation="4"  flood-color="#0F172A" flood-opacity="0.08"/>
+      <feDropShadow dx="0" dy="1"  stdDeviation="1" flood-color="#0F172A" flood-opacity="0.10"/>
     </filter>
 
     <filter id="avatarShadow" x="-25%" y="-25%" width="160%" height="160%">
