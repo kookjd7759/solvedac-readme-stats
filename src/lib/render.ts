@@ -125,6 +125,23 @@ export function renderCard(input: RenderInput) {
       </g>
     `
     : "";
+  // ✅ class icon overlay (to the right of badge)
+  const classGap = 8;
+  const classX = badgeX + badgeSize + classGap;
+  const classY = badgeY;
+
+  const classOverlay = hasClassIcon
+    ? `
+      <g>
+        <image href="${input.classDataUri}"
+              x="${classX}" y="${classY}"
+              width="${badgeSize}" height="${badgeSize}"
+              preserveAspectRatio="xMidYMid meet"
+              style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));"/>
+      </g>
+    `
+    : "";
+
 
 
   function iconPill(x: number, y: number, iconHref: string, title: string) {
@@ -138,12 +155,6 @@ export function renderCard(input: RenderInput) {
       </g>
     `;
   }
-
-  const tagY = nameY;
-  let curX = tagsX;
-
-  const classMarkup =
-    hasClassIcon ? iconPill(curX, tagY, input.classDataUri!, `Class ${clazz || ""}`.trim()) : "";
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${W + PAD * 2}" height="${H + PAD * 2}"
@@ -249,15 +260,13 @@ export function renderCard(input: RenderInput) {
     ${handle}
   </text>
 
-  <!-- ✅ NEW: Handle 오른쪽에 badge + class -->
-  ${classMarkup}
-
   <!-- Rows -->
   ${row("Solved", `${solved}`, rowsTop)}
   ${row("Rank", rank ? `#${rank}` : "-", rowsTop + (rowH + rowGap) * 1)}
 
 +  <!-- ✅ Badge bottom-right overlay -->
 +  ${badgeOverlay}
++  ${classOverlay}
 </svg>`;
 }
 

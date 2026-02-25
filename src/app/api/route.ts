@@ -186,7 +186,27 @@ export async function GET(req: Request) {
       }
     }
 
-    const classDataUri = "";
+    // Class icon (optional)
+    let classDataUri = "";
+    const classNum = (u as any).class as number | undefined;
+    const classDeco = ((u as any).classDecoration as string | undefined) || "none";
+
+    if (classNum && classNum >= 1 && classNum <= 10) {
+      const suffix =
+        classDeco === "silver" ? "s" :
+        classDeco === "gold" ? "g" :
+        "";
+
+      const classUrl = `https://static.solved.ac/class/c${classNum}${suffix}.svg`;
+
+      try {
+        classDataUri = await fetchAsDataUri(classUrl, "image/svg+xml");
+      } catch (e) {
+        console.log("[class] fail:", e);
+        classDataUri = "";
+      }
+    }
+
 
     const svg = basic.renderCard({
       user: u,
