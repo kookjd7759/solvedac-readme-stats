@@ -50,12 +50,12 @@ async function resolveBackgroundImageUrl(backgroundId: string): Promise<string> 
   });
 
   // backgroundId가 들어간 profile_bg URL들을 전부 수집
-  const reAll = new RegExp(
+  const re = new RegExp(
     `https:\\/\\/static\\.solved\\.ac\\/profile_bg\\/[^\\"\\']*${backgroundId}[^\\"\\']*\\.(?:jpe?g|png|webp)`,
     "ig"
   );
 
-  const urls = html.match(reAll) || [];
+  const urls = html.match(re) || [];
   if (urls.length === 0) throw new Error(`background image url not found for ${backgroundId}`);
 
   // 점수로 "가장 큰 이미지" 추정해서 선택
@@ -76,14 +76,62 @@ async function resolveBackgroundImageUrl(backgroundId: string): Promise<string> 
   BG_URL_CACHE.set(backgroundId, best);
   return best;
 }
+const BADGE_URL_CACHE = new Map<string, string>();
 
-async function tryFetchDataUri(url: string, forcedMime?: string) {
-  try {
-    return await fetchAsDataUri(url, forcedMime);
-  } catch {
-    return "";
-  }
+function escRe(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
+
+function normalizeSolvedStaticUrl(u: string) {
+  // protocol-relative / relative 처리
+  if (u.startsWith("//")) u = "https:" + u;
+  else if (u.startsWith("/")) u = "https://static.solved.ac" + u;
+
+  // 끝에 달린 "?" 같은 찌꺼기 제거
+  u = u.replace(/\?+$/, "");
+
+  return u;
+}
+
+async function resolveBadgeImageUrlFromBadgePage(badgeId: string): Promise<string> {
+  const cached = BADGE_URL_CACHE.get(badgeId);
+  if (cached) return cached;
+
+  // ✅ 배지 상세 페이지는 badgeId로 접근 가능
+  const pageUrl = `https://solved.ac/badges/${encodeURIComponent(badgeId)}`;
+  console.log("[badge] badge page:", pageUrl);
+
+  const res = await fetch(pageUrl, {
+    headers: { Accept: "text/html,application/xhtml+xml" },
+  });
+
+  const html = await res.text();
+  console.log("[badge] badge page status:", res.status, "len:", html.length);
+
+  if (!res.ok) throw new Error(`badge page fetch error ${res.status}`);
+
+  const id = escRe(badgeId);
+
+  // ✅ 두 케이스 모두 커버:
+  // 1) /profile_badge/120x120/{id}.png
+  // 2) /profile_badge/profile/120x120/{id}-uuid.png
+  // + full / // / / (상대경로) 전부 허용
+  const re = new RegExp(
+    String.raw`(?:(?:https?:)?\/\/static\.solved\.ac)?\/profile_badge(?:\/profile)?\/120x120\/${id}[^"' <>\n]*\.png(?:\?[^"' <>\n]*)?`,
+    "i"
+  );
+
+  const m = html.match(re);
+  if (!m) throw new Error(`badge image url not found in badge page for badgeId=${badgeId}`);
+
+  const url = normalizeSolvedStaticUrl(m[0]);
+  BADGE_URL_CACHE.set(badgeId, url);
+  console.log("[badge] found:", url);
+
+  return url;
+}
+
+
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -95,6 +143,8 @@ export async function GET(req: Request) {
 
   try {
     const u = await fetchSolvedUser(handle);
+    console.log("[user keys]", Object.keys(u as any));
+    console.log("[user badge fields]", (u as any).badgeId, (u as any).badge, (u as any).badgeUrl, (u as any).profileBadge);
 
     // Tier icon (SVG) - data uri로 인라인 (README 안정)
     const tier = u.tier ?? 0;
@@ -122,23 +172,19 @@ export async function GET(req: Request) {
       }
     }
 
-    // Badge (optional)
     let badgeDataUri = "";
     const badgeId = (u as any).badgeId as string | undefined;
 
     if (badgeId) {
-      const url = `https://static.solved.ac/profile_badge/120x120/${badgeId}.png`
-      
-      const lower = url.toLowerCase();
-      const forcedMime =
-        lower.endsWith(".svg") ? "image/svg+xml" :
-        lower.endsWith(".webp") ? "image/webp" :
-        lower.endsWith(".png") ? "image/png" :
-        undefined;
-
-      badgeDataUri = await tryFetchDataUri(url, forcedMime);
+      try {
+        console.log("BADGE ID:", badgeId);
+        const badgeUrl = await resolveBadgeImageUrlFromBadgePage(badgeId);
+        badgeDataUri = await fetchAsDataUri(badgeUrl, "image/png");
+      } catch (e) {
+        console.log("[badge] fail:", e);
+        badgeDataUri = "";
+      }
     }
-
 
     const classDataUri = "";
 
