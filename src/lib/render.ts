@@ -65,11 +65,6 @@ export function renderCard(input: RenderInput) {
   // ✅ NEW: name + badges
   const tagH = 18;
   const tagR = 9;
-  const tagGap = 6;
-
-  // 배지/클래스 아이콘 크기
-  const badgeIcon = 14;
-  const classIcon = 14;
 
   // 닉네임 오른쪽 시작 위치: 대충 텍스트 뒤로 충분히 떨어뜨리기
   // (SVG에서 텍스트 실제 폭 측정이 어려워서, handle 길이에 따라 보정)
@@ -80,7 +75,7 @@ export function renderCard(input: RenderInput) {
   const font = "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
   const accent = input.accentColor || "#3ef0b1";
 
-  // Stats rows (4 lines)
+  // Stats rows (2 lines)
   const rowsTop = topH + 58;
   const rowH = 28;
   const rowGap = 8;
@@ -141,20 +136,6 @@ export function renderCard(input: RenderInput) {
       </g>
     `
     : "";
-
-
-
-  function iconPill(x: number, y: number, iconHref: string, title: string) {
-    const safe = esc(title);
-    const w = 32;
-    return `
-      <g>
-        <rect x="${x}" y="${y - tagH + 3}" width="${w}" height="${tagH}" rx="${tagR}" fill="#F1F5F9"/>
-        <image href="${iconHref}" x="${x + 9}" y="${y - tagH + 5}" width="${classIcon}" height="${classIcon}"/>
-        <title>${safe}</title>
-      </g>
-    `;
-  }
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${W + PAD * 2}" height="${H + PAD * 2}"
@@ -264,9 +245,9 @@ export function renderCard(input: RenderInput) {
   ${row("Solved", `${solved}`, rowsTop)}
   ${row("Rank", rank ? `#${rank}` : "-", rowsTop + (rowH + rowGap) * 1)}
 
-+  <!-- ✅ Badge bottom-right overlay -->
-+  ${badgeOverlay}
-+  ${classOverlay}
+  <!-- ✅ Badge bottom-right overlay -->
+  ${badgeOverlay}
+  ${classOverlay}
 </svg>`;
 }
 
