@@ -1,92 +1,74 @@
-import type { SolvedUser } from "./solvedac";
-
-function esc(s: string) {
-  return s
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
+import type { SolvedUser } from './solvedac';
+import { esc } from './esc';
+import { W, H, R, PAD, topH } from './constant/layout';
+import { avatarCx, avatarCy, avatarR, avatarSize } from './constant/avatar';
 
 type RenderInput = {
-  user: SolvedUser;
+    user: SolvedUser;
 
-  tierDataUri: string;
-  avatarDataUri: string;
-  bgDataUri: string;
+    tierDataUri: string;
+    avatarDataUri: string;
+    bgDataUri: string;
 
-  badgeDataUri: string; // 설정 뱃지 (있으면)
-  classDataUri?: string; // ✅ NEW: 클래스 아이콘(data uri) (없으면 ""/undefined)
+    badgeDataUri: string; // 설정 뱃지 (있으면)
+    classDataUri?: string; // ✅ NEW: 클래스 아이콘(data uri) (없으면 ""/undefined)
 
-  accentColor?: string;
+    accentColor?: string;
 };
 
 export function renderCard(input: RenderInput) {
-  const u = input.user;
+    const u = input.user;
 
-  const handle = esc(u.handle || "");
-  const solved = u.solvedCount ?? 0;
-  const rank = (u as any).rank ?? 0;
-  const clazz = (u as any).class ?? 0;
-  const streak = u.maxStreak ?? 0;
+    const handle = esc(u.handle || '');
+    const solved = u.solvedCount ?? 0;
+    const rank = (u as any).rank ?? 0;
+    const clazz = (u as any).class ?? 0;
+    const streak = u.maxStreak ?? 0;
 
-  const hasAvatar = !!input.avatarDataUri;
-  const hasBg = !!input.bgDataUri;
+    const hasAvatar = !!input.avatarDataUri;
+    const hasBg = !!input.bgDataUri;
 
-  const hasBadge = !!input.badgeDataUri;
-  const hasClassIcon = !!(input.classDataUri && input.classDataUri.trim().length > 0);
+    const hasBadge = !!input.badgeDataUri;
+    const hasClassIcon = !!(
+        input.classDataUri && input.classDataUri.trim().length > 0
+    );
 
-  // ===== Layout =====
-  const W = 560;
-  const H = 220;
-  const R = 18;
-  const PAD = 33; // 바깥 패딩
+    // Name line
+    const nameX = 18;
+    const nameY = topH + 34;
 
-  const topH = 92;
+    // Tier icon next to name
+    const tierSize = 24;
+    const tierX = nameX;
+    const tierY = topH + 18;
 
-  // Avatar
-  const avatarSize = 62;
-  const avatarR = avatarSize / 2;
-  const avatarCx = 56;
-  const avatarCy = 46;
+    const textX = nameX + tierSize + 8;
 
-  // Name line
-  const nameX = 18;
-  const nameY = topH + 34;
+    // ✅ NEW: name + badges
+    const tagH = 18;
+    const tagR = 9;
 
-  // Tier icon next to name
-  const tierSize = 18;
-  const tierX = nameX;
-  const tierY = topH + 18;
+    // 닉네임 오른쪽 시작 위치: 대충 텍스트 뒤로 충분히 떨어뜨리기
+    // (SVG에서 텍스트 실제 폭 측정이 어려워서, handle 길이에 따라 보정)
+    // 평균 폰트 18px에서 글자폭 ~ 9~10px 정도로 잡고 + 여유
+    const approxNameW = Math.min(280, 10 * handle.length + 8);
+    const tagsX = textX + approxNameW + 10;
 
-  const textX = nameX + tierSize + 8;
+    const font = 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto';
+    const accent = input.accentColor || '#3ef0b1';
 
-  // ✅ NEW: name + badges
-  const tagH = 18;
-  const tagR = 9;
+    // Stats rows (2 lines)
+    const rowsTop = topH + 58;
+    const rowH = 28;
+    const rowGap = 8;
+    const leftPad = 18;
+    const rightPad = 18;
+    const rowW = W - leftPad - rightPad;
 
-  // 닉네임 오른쪽 시작 위치: 대충 텍스트 뒤로 충분히 떨어뜨리기
-  // (SVG에서 텍스트 실제 폭 측정이 어려워서, handle 길이에 따라 보정)
-  // 평균 폰트 18px에서 글자폭 ~ 9~10px 정도로 잡고 + 여유
-  const approxNameW = Math.min(280, 10 * handle.length + 8);
-  const tagsX = textX + approxNameW + 10;
-
-  const font = "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
-  const accent = input.accentColor || "#3ef0b1";
-
-  // Stats rows (2 lines)
-  const rowsTop = topH + 58;
-  const rowH = 28;
-  const rowGap = 8;
-  const leftPad = 18;
-  const rightPad = 18;
-  const rowW = W - leftPad - rightPad;
-
-  function row(label: string, value: string, y: number) {
-    const L = esc(label);
-    const V = esc(value);
-    return `
+    function row(label: string, value: string, y: number) {
+        const L = esc(label);
+        const V = esc(value);
+        return `
       <g>
         <rect x="${leftPad}" y="${y}" width="${rowW}" height="${rowH}" rx="12" fill="#F8FAFC"/>
         <text x="${leftPad + 12}" y="${y + 19}" fill="#64748B" font-size="12" font-weight="700" font-family="${font}">
@@ -97,20 +79,20 @@ export function renderCard(input: RenderInput) {
         </text>
       </g>
     `;
-  }
+    }
 
-  // Diagonal bg
-  const triX = Math.round(W * 0.29);
-  const kneeY = Math.round(topH * 1.0);
-  const kneeX = Math.round(W * 0.60);
+    // Diagonal bg
+    const triX = Math.round(W * 0.29);
+    const kneeY = Math.round(topH * 1.0);
+    const kneeX = Math.round(W * 0.6);
 
-  // ✅ badge overlay (bottom-right)
-  const badgeSize = 50;     // 크기 (원하면 64~88 사이로 조절)
-  const badgeX = avatarCx + avatarR - badgeSize / 2 + 40; // 40 만큼 오른쪽 이동 
-  const badgeY = avatarCy + avatarR - badgeSize / 2 - 20; // 20 만큼 위쪽 이동
+    // ✅ badge overlay (bottom-right)
+    const badgeSize = 50; // 크기 (원하면 64~88 사이로 조절)
+    const badgeX = avatarCx + avatarR - badgeSize / 2 + 40; // 40 만큼 오른쪽 이동
+    const badgeY = avatarCy + avatarR - badgeSize / 2 - 20; // 20 만큼 위쪽 이동
 
-  const badgeOverlay = hasBadge
-    ? `
+    const badgeOverlay = hasBadge
+        ? `
       <g>
         <image href="${input.badgeDataUri}"
               x="${badgeX}" y="${badgeY}"
@@ -119,14 +101,14 @@ export function renderCard(input: RenderInput) {
               style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));"/>
       </g>
     `
-    : "";
-  // ✅ class icon overlay (to the right of badge)
-  const classGap = 8;
-  const classX = badgeX + badgeSize + classGap;
-  const classY = badgeY;
+        : '';
+    // ✅ class icon overlay (to the right of badge)
+    const classGap = 8;
+    const classX = badgeX + badgeSize + classGap;
+    const classY = badgeY;
 
-  const classOverlay = hasClassIcon
-    ? `
+    const classOverlay = hasClassIcon
+        ? `
       <g>
         <image href="${input.classDataUri}"
               x="${classX}" y="${classY}"
@@ -135,9 +117,9 @@ export function renderCard(input: RenderInput) {
               style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));"/>
       </g>
     `
-    : "";
+        : '';
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
+    return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${W + PAD * 2}" height="${H + PAD * 2}"
      viewBox="-${PAD} -${PAD} ${W + PAD * 2} ${H + PAD * 2}"
      xmlns="http://www.w3.org/2000/svg">
@@ -194,10 +176,10 @@ export function renderCard(input: RenderInput) {
       <g clip-path="url(#clipBgTri)">
         <rect x="${triX}" y="0" width="${W - triX}" height="${kneeY}" fill="url(#triFallback)"/>
         ${
-          hasBg
-            ? `<image href="${input.bgDataUri}" x="${triX}" y="0" width="${W - triX}" height="${kneeY}"
+            hasBg
+                ? `<image href="${input.bgDataUri}" x="${triX}" y="0" width="${W - triX}" height="${kneeY}"
                     preserveAspectRatio="xMidYMid slice"/>`
-            : ""
+                : ''
         }
         <rect x="${triX}" y="0" width="${W - triX}" height="${kneeY}" fill="#0F172A" opacity="0.06"/>
       </g>
@@ -213,9 +195,9 @@ export function renderCard(input: RenderInput) {
 
       <!-- ✅ subtle inner highlight (top-left shine) -->
       <path d="M ${R} 1 H ${W - R} 
-              C ${W - R/2} 1 ${W - 1} ${R/2} ${W - 1} ${R}
+              C ${W - R / 2} 1 ${W - 1} ${R / 2} ${W - 1} ${R}
               V ${Math.round(topH * 0.55)} 
-              C ${Math.round(W * 0.66)} ${Math.round(topH * 0.38)} ${Math.round(W * 0.40)} ${Math.round(topH * 0.28)} ${R} ${Math.round(topH * 0.22)}
+              C ${Math.round(W * 0.66)} ${Math.round(topH * 0.38)} ${Math.round(W * 0.4)} ${Math.round(topH * 0.28)} ${R} ${Math.round(topH * 0.22)}
               Z"
             fill="url(#shine)"/>
     </g>
@@ -226,15 +208,19 @@ export function renderCard(input: RenderInput) {
     <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarR + 3}" fill="#FFFFFF"/>
     <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarR + 2}" fill="none" stroke="#E5E7EB"/>
     ${
-      hasAvatar
-        ? `<image href="${input.avatarDataUri}" x="${avatarCx - avatarR}" y="${avatarCy - avatarR}"
+        hasAvatar
+            ? `<image href="${input.avatarDataUri}" x="${avatarCx - avatarR}" y="${avatarCy - avatarR}"
                  width="${avatarSize}" height="${avatarSize}" clip-path="url(#clipAvatar)"
                  preserveAspectRatio="xMidYMid slice"/>`
-        : `<text x="${avatarCx}" y="${avatarCy + 6}" text-anchor="middle"
+            : `<text x="${avatarCx}" y="${avatarCy + 6}" text-anchor="middle"
                  fill="#94A3B8" font-size="18" font-weight="900" font-family="${font}">?</text>`
     }
   </g>
 
+  <!-- ✅ Badge bottom-right overlay -->
+  ${badgeOverlay}
+  ${classOverlay}
+  
   <!-- Tier + Handle -->
   <image href="${input.tierDataUri}" x="${tierX}" y="${tierY}" width="${tierSize}" height="${tierSize}"/>
   <text x="${textX}" y="${nameY}" fill="#0F172A" font-size="18" font-weight="900" font-family="${font}">
@@ -242,24 +228,21 @@ export function renderCard(input: RenderInput) {
   </text>
 
   <!-- Rows -->
-  ${row("Solved", `${solved}`, rowsTop)}
-  ${row("Rank", rank ? `#${rank}` : "-", rowsTop + (rowH + rowGap) * 1)}
+  ${row('Solved', `${solved}`, rowsTop)}
+  ${row('Rank', rank ? `#${rank}` : '-', rowsTop + (rowH + rowGap) * 1)}
 
-  <!-- ✅ Badge bottom-right overlay -->
-  ${badgeOverlay}
-  ${classOverlay}
 </svg>`;
 }
 
 export function renderErrorCard(msg: string) {
-  const safe = esc(msg);
-  const W = 560;
-  const H = 140;
-  const R = 18;
-  const PAD = 33; // 바깥 패딩
-  const font = "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
+    const safe = esc(msg);
+    const W = 560;
+    const H = 140;
+    const R = 18;
+    const PAD = 33; // 바깥 패딩
+    const font = 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto';
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
+    return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${W + PAD * 2}" height="${H + PAD * 2}"
      viewBox="0 0 ${W + PAD * 2} ${H + PAD * 2}"
      xmlns="http://www.w3.org/2000/svg">
