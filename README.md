@@ -32,10 +32,7 @@ Add this to your GitHub README:
 ```markdown
 [![Donggyun's solved ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://github.com/kookjd7759/solvedac-readme-stats)
 ```
-Example:
-```markdown
-[![Donggyun's solved ac stats](https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759)](https://github.com/kookjd7759/solvedac-readme-stats)
-```
+
 
 ## 🚀 Deploy Your Own  
 - Fork  
