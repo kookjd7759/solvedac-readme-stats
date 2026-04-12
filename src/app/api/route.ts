@@ -34,6 +34,14 @@ async function fetchAsDataUri(url: string, forcedMime?: string): Promise<string>
   return `data:${ct.split(";")[0]};base64,${b64}`;
 }
 
+async function fetchAsDataUriOrEmpty(url: string, forcedMime?: string): Promise<string> {
+  try {
+    return await fetchAsDataUri(url, forcedMime);
+  } catch {
+    return "";
+  }
+}
+
 // Edge 인스턴스 안에서만 살아있는 간단 캐시 (성능용)
 const BG_URL_CACHE = new Map<string, string>();
 
@@ -106,14 +114,12 @@ async function resolveBadgeImageUrlFromBadgePage(badgeId: string): Promise<strin
 
   // ✅ 배지 상세 페이지는 badgeId로 접근 가능
   const pageUrl = `https://solved.ac/badges/${encodeURIComponent(badgeId)}`;
-  console.log("[badge] badge page:", pageUrl);
 
   const res = await fetch(pageUrl, {
     headers: { Accept: "text/html,application/xhtml+xml" },
   });
 
   const html = await res.text();
-  console.log("[badge] badge page status:", res.status, "len:", html.length);
 
   if (!res.ok) throw new Error(`badge page fetch error ${res.status}`);
 
@@ -133,7 +139,6 @@ async function resolveBadgeImageUrlFromBadgePage(badgeId: string): Promise<strin
 
   const url = normalizeSolvedStaticUrl(m[0]);
   BADGE_URL_CACHE.set(badgeId, url);
-  console.log("[badge] found:", url);
 
   return url;
 }
@@ -150,17 +155,15 @@ export async function GET(req: Request) {
 
   try {
     const u = await fetchSolvedUser(handle);
-    console.log("[user keys]", Object.keys(u as any));
-    console.log("[user badge fields]", (u as any).badgeId, (u as any).badge, (u as any).badgeUrl, (u as any).profileBadge);
 
     // Tier icon (SVG) - data uri로 인라인 (README 안정)
     const tier = u.tier ?? 0;
     const tierUrl = `https://static.solved.ac/tier_small/${tier}.svg`;
-    const tierDataUri = await fetchAsDataUri(tierUrl, "image/svg+xml");
+    const tierDataUri = await fetchAsDataUriOrEmpty(tierUrl, "image/svg+xml");
 
     // Avatar: null이면 default_profile 사용
     const avatarUrl = u.profileImageUrl ?? "https://static.solved.ac/misc/360x360/default_profile.png";
-    const avatarDataUri = await fetchAsDataUri(avatarUrl, "image/png");
+    const avatarDataUri = await fetchAsDataUriOrEmpty(avatarUrl, "image/png");
 
     // Background (optional)
     let bgDataUri = "";
@@ -184,11 +187,9 @@ export async function GET(req: Request) {
 
     if (badgeId) {
       try {
-        console.log("BADGE ID:", badgeId);
         const badgeUrl = await resolveBadgeImageUrlFromBadgePage(badgeId);
         badgeDataUri = await fetchAsDataUri(badgeUrl, "image/png");
-      } catch (e) {
-        console.log("[badge] fail:", e);
+      } catch {
         badgeDataUri = "";
       }
     }
@@ -208,8 +209,7 @@ export async function GET(req: Request) {
 
       try {
         classDataUri = await fetchAsDataUri(classUrl, "image/svg+xml");
-      } catch (e) {
-        console.log("[class] fail:", e);
+      } catch {
         classDataUri = "";
       }
     }

@@ -119,6 +119,19 @@ export function renderCard(input: RenderInput) {
     `
         : '';
 
+    const tierFallbackText = esc(String(u.tier ?? 0));
+    const tierIcon = input.tierDataUri
+        ? `<image href="${input.tierDataUri}" x="${tierX}" y="${tierY}" width="${tierSize}" height="${tierSize}"/>`
+        : `
+      <g>
+        <circle cx="${tierX + tierSize / 2}" cy="${tierY + tierSize / 2}" r="${tierSize / 2}" fill="#E2E8F0"/>
+        <text x="${tierX + tierSize / 2}" y="${tierY + tierSize / 2 + 4}"
+              text-anchor="middle" fill="#334155" font-size="11" font-weight="900" font-family="${font}">
+          ${tierFallbackText}
+        </text>
+      </g>
+    `;
+
     return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${W + PAD * 2}" height="${H + PAD * 2}"
      viewBox="-${PAD} -${PAD} ${W + PAD * 2} ${H + PAD * 2}"
@@ -222,7 +235,7 @@ export function renderCard(input: RenderInput) {
   ${classOverlay}
   
   <!-- Tier + Handle -->
-  <image href="${input.tierDataUri}" x="${tierX}" y="${tierY}" width="${tierSize}" height="${tierSize}"/>
+  ${tierIcon}
   <text x="${textX}" y="${nameY}" fill="#0F172A" font-size="18" font-weight="900" font-family="${font}">
     ${handle}
   </text>
