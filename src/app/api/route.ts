@@ -161,7 +161,7 @@ export async function GET(req: Request) {
     const tierUrl = `https://static.solved.ac/tier_small/${tier}.svg`;
     const tierDataUri = await fetchAsDataUriOrEmpty(tierUrl, "image/svg+xml");
 
-    // Avatar: null이면 default_profile 사용
+    // Avatar: null이면 solved 기본 이미지 사용
     const avatarUrl = u.profileImageUrl ?? "https://static.solved.ac/misc/360x360/default_profile.png";
     const avatarDataUri = await fetchAsDataUriOrEmpty(avatarUrl, "image/png");
 
