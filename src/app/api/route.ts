@@ -1,7 +1,7 @@
 export const runtime = "edge";
 
-import { fetchSolvedUser } from "@/lib/solvedac";
-import * as basic from "@/lib/render";
+import { fetchSolvedUser } from "../../lib/solvedac";
+import * as basic from "../../lib/render";
 
 const OK_HEADERS: Record<string, string> = {
   "Content-Type": "image/svg+xml",
