@@ -49,13 +49,20 @@ async function resolveBackgroundImageUrl(backgroundId: string): Promise<string> 
     return await r.text();
   });
 
+  // HTML 안의 escaped slash(\/)를 먼저 일반 slash(/)로 통일
+  const normalizedHtml = html.replace(/\\\//g, "/");
+  const id = escRe(backgroundId);
+
   // backgroundId가 들어간 profile_bg URL들을 전부 수집
+  // - https://static.solved.ac/...
+  // - //static.solved.ac/...
+  // - /profile_bg/...
   const re = new RegExp(
-    `https:\\/\\/static\\.solved\\.ac\\/profile_bg\\/[^\\"\\']*${backgroundId}[^\\"\\']*\\.(?:jpe?g|png|webp)`,
+    String.raw`(?:(?:https?:)?\/\/static\.solved\.ac)?\/profile_bg\/[^"' <>\n]*${id}[^"' <>\n]*\.(?:jpe?g|png|webp)(?:\?[^"' <>\n]*)?`,
     "ig"
   );
 
-  const urls = html.match(re) || [];
+  const urls = [...new Set((normalizedHtml.match(re) || []).map(normalizeSolvedStaticUrl))];
   if (urls.length === 0) throw new Error(`background image url not found for ${backgroundId}`);
 
   // 점수로 "가장 큰 이미지" 추정해서 선택
@@ -161,7 +168,7 @@ export async function GET(req: Request) {
     if (bgId) {
       try {
         const bgUrl = await resolveBackgroundImageUrl(bgId);
-        const lower = bgUrl.toLowerCase();
+        const lower = bgUrl.split("?")[0]!.split("#")[0]!.toLowerCase();
         const mime =
           lower.endsWith(".png") ? "image/png" :
           lower.endsWith(".webp") ? "image/webp" :
