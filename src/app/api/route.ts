@@ -13,188 +13,441 @@ const ERR_HEADERS: Record<string, string> = {
   "Cache-Control": "no-store",
 };
 
+const JSON_HEADERS: Record<string, string> = {
+  "Content-Type": "application/json; charset=utf-8",
+  "Cache-Control": "no-store",
+};
+
+type FetchAttempt = {
+  url: string;
+  ok: boolean;
+  error?: string;
+  contentType?: string | null;
+};
+
+type AssetDebug = {
+  ok: boolean;
+  source?: string | null;
+  resolvedUrl?: string | null;
+  attempts?: FetchAttempt[];
+  pageUrl?: string;
+  pageAttempts?: FetchAttempt[];
+  extractedUrls?: string[];
+  error?: string;
+};
+
+function uniqueStrings(values: string[]) {
+  return [...new Set(values.filter(Boolean))];
+}
+
+function safeErrorMessage(err: unknown) {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "string") return err;
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return "unknown error";
+  }
+}
+
 function bytesToBase64(bytes: Uint8Array) {
   let bin = "";
   for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
   return btoa(bin);
 }
 
-async function fetchAsDataUri(url: string, forcedMime?: string): Promise<string> {
-  const res = await fetch(url, {
-    headers: {
-      Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-    },
-  });
+function resolveAssetBases() {
+  const envBases = (process.env.SOLVEDAC_ASSET_BASES || "")
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
 
-  if (!res.ok) throw new Error(`asset fetch failed (${res.status}): ${url}`);
-
-  const ct = forcedMime || res.headers.get("content-type") || "application/octet-stream";
-  const ab = await res.arrayBuffer();
-  const b64 = bytesToBase64(new Uint8Array(ab));
-  return `data:${ct.split(";")[0]};base64,${b64}`;
+  return uniqueStrings([
+    ...envBases,
+    "https://static.solved.ac",
+    "https://solved.ac",
+  ]);
 }
 
-async function fetchAsDataUriOrEmpty(url: string, forcedMime?: string): Promise<string> {
-  try {
-    return await fetchAsDataUri(url, forcedMime);
-  } catch {
-    return "";
-  }
+const SOLVED_ASSET_BASES = resolveAssetBases();
+const PRIMARY_ASSET_BASE = SOLVED_ASSET_BASES[0] || "https://static.solved.ac";
+
+function normalizeAssetUrl(rawUrl: string, base = PRIMARY_ASSET_BASE) {
+  const value = rawUrl.trim();
+  if (!value) return value;
+  if (value.startsWith("data:")) return value;
+  if (/^https?:\/\//i.test(value)) return value;
+  if (value.startsWith("//")) return `https:${value}`;
+  if (value.startsWith("/")) return new URL(value, base).toString();
+  return value;
 }
 
-// Edge 인스턴스 안에서만 살아있는 간단 캐시 (성능용)
-const BG_URL_CACHE = new Map<string, string>();
+function assetCandidatesFromRaw(rawUrl: string | null | undefined) {
+  if (!rawUrl) return [];
 
-async function resolveBackgroundImageUrl(backgroundId: string): Promise<string> {
-  const cached = BG_URL_CACHE.get(backgroundId);
-  if (cached) return cached;
+  const value = rawUrl.trim();
+  if (!value) return [];
 
-  const pageUrl = `https://solved.ac/en/backgrounds/${encodeURIComponent(backgroundId)}`;
-  const html = await fetch(pageUrl, {
-    headers: { Accept: "text/html,application/xhtml+xml" },
-  }).then(async (r) => {
-    if (!r.ok) throw new Error(`background page fetch error ${r.status}`);
-    return await r.text();
-  });
-
-  // HTML 안의 escaped slash(\/)를 먼저 일반 slash(/)로 통일
-  const normalizedHtml = html.replace(/\\\//g, "/");
-  const id = escRe(backgroundId);
-
-  // backgroundId가 들어간 profile_bg URL들을 전부 수집
-  // - https://static.solved.ac/...
-  // - //static.solved.ac/...
-  // - /profile_bg/...
-  const re = new RegExp(
-    String.raw`(?:(?:https?:)?\/\/static\.solved\.ac)?\/profile_bg\/[^"' <>\n]*${id}[^"' <>\n]*\.(?:jpe?g|png|webp)(?:\?[^"' <>\n]*)?`,
-    "ig"
-  );
-
-  const urls = [...new Set((normalizedHtml.match(re) || []).map(normalizeSolvedStaticUrl))];
-  if (urls.length === 0) throw new Error(`background image url not found for ${backgroundId}`);
-
-  // 점수로 "가장 큰 이미지" 추정해서 선택
-  function score(url: string) {
-    const m = url.match(/\/(\d{2,4})x(\d{2,4})\//i);
-    if (m) {
-      const w = Number(m[1]);
-      const h = Number(m[2]);
-      return w * h;
-    }
-    let s = 1_000_000_000;
-    if (url.includes("/profile/")) s -= 200_000_000;
-    return s;
+  if (value.startsWith("/") && !value.startsWith("//")) {
+    return uniqueStrings(
+      SOLVED_ASSET_BASES.map((base) => normalizeAssetUrl(value, base))
+    );
   }
 
-  const best = urls.sort((a, b) => score(b) - score(a))[0]!;
-
-  BG_URL_CACHE.set(backgroundId, best);
-  return best;
+  return [normalizeAssetUrl(value)];
 }
-const BADGE_URL_CACHE = new Map<string, string>();
+
+function staticPathCandidates(path: string) {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return assetCandidatesFromRaw(normalizedPath);
+}
 
 function escRe(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function normalizeSolvedStaticUrl(u: string) {
-  // protocol-relative / relative 처리
-  if (u.startsWith("//")) u = "https:" + u;
-  else if (u.startsWith("/")) u = "https://static.solved.ac" + u;
-
-  // 끝에 달린 "?" 같은 찌꺼기 제거
-  u = u.replace(/\?+$/, "");
-
-  return u;
+function mimeFromAssetUrl(url: string, fallback?: string) {
+  const lower = url.split("?")[0]!.split("#")[0]!.toLowerCase();
+  if (lower.endsWith(".svg")) return "image/svg+xml";
+  if (lower.endsWith(".png")) return "image/png";
+  if (lower.endsWith(".webp")) return "image/webp";
+  if (lower.endsWith(".avif")) return "image/avif";
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+  return fallback;
 }
 
-async function resolveBadgeImageUrlFromBadgePage(badgeId: string): Promise<string> {
-  const cached = BADGE_URL_CACHE.get(badgeId);
-  if (cached) return cached;
-
-  // ✅ 배지 상세 페이지는 badgeId로 접근 가능
-  const pageUrl = `https://solved.ac/badges/${encodeURIComponent(badgeId)}`;
-
-  const res = await fetch(pageUrl, {
-    headers: { Accept: "text/html,application/xhtml+xml" },
+async function fetchAsDataUri(url: string, forcedMime?: string) {
+  const res = await fetch(url, {
+    headers: {
+      Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9,ko;q=0.8",
+    },
+    cache: "no-store",
   });
 
-  const html = await res.text();
+  if (!res.ok) throw new Error(`asset fetch failed (${res.status}): ${url}`);
 
-  if (!res.ok) throw new Error(`badge page fetch error ${res.status}`);
+  const contentType = forcedMime || res.headers.get("content-type") || "application/octet-stream";
+  const ab = await res.arrayBuffer();
+  const b64 = bytesToBase64(new Uint8Array(ab));
 
-  const id = escRe(badgeId);
-
-  // ✅ 두 케이스 모두 커버:
-  // 1) /profile_badge/120x120/{id}.png
-  // 2) /profile_badge/profile/120x120/{id}-uuid.png
-  // + full / // / / (상대경로) 전부 허용
-  const re = new RegExp(
-    String.raw`(?:(?:https?:)?\/\/static\.solved\.ac)?\/profile_badge(?:\/profile)?\/120x120\/${id}[^"' <>\n]*\.png(?:\?[^"' <>\n]*)?`,
-    "i"
-  );
-
-  const m = html.match(re);
-  if (!m) throw new Error(`badge image url not found in badge page for badgeId=${badgeId}`);
-
-  const url = normalizeSolvedStaticUrl(m[0]);
-  BADGE_URL_CACHE.set(badgeId, url);
-
-  return url;
+  return {
+    dataUri: `data:${contentType.split(";")[0]};base64,${b64}`,
+    contentType,
+  };
 }
 
+async function fetchAssetFromCandidates(
+  source: string | null | undefined,
+  candidates: string[],
+  fallbackMime?: string
+) {
+  const attempts: FetchAttempt[] = [];
 
+  for (const candidate of uniqueStrings(candidates)) {
+    try {
+      const { dataUri, contentType } = await fetchAsDataUri(
+        candidate,
+        mimeFromAssetUrl(candidate, fallbackMime)
+      );
+
+      attempts.push({
+        url: candidate,
+        ok: true,
+        contentType: contentType.split(";")[0],
+      });
+
+      return {
+        dataUri,
+        debug: {
+          ok: true,
+          source: source ?? null,
+          resolvedUrl: candidate,
+          attempts,
+        } satisfies AssetDebug,
+      };
+    } catch (err) {
+      attempts.push({
+        url: candidate,
+        ok: false,
+        error: safeErrorMessage(err),
+      });
+    }
+  }
+
+  return {
+    dataUri: "",
+    debug: {
+      ok: false,
+      source: source ?? null,
+      attempts,
+      error: attempts.at(-1)?.error || "no asset candidates available",
+    } satisfies AssetDebug,
+  };
+}
+
+async function fetchHtmlFromCandidates(pageUrls: string[]) {
+  const attempts: FetchAttempt[] = [];
+
+  for (const pageUrl of uniqueStrings(pageUrls)) {
+    try {
+      const res = await fetch(pageUrl, {
+        headers: {
+          Accept: "text/html,application/xhtml+xml",
+          "Accept-Language": "en-US,en;q=0.9,ko;q=0.8",
+        },
+        cache: "no-store",
+      });
+
+      if (!res.ok) throw new Error(`page fetch error ${res.status}: ${pageUrl}`);
+
+      const html = await res.text();
+      attempts.push({ url: pageUrl, ok: true, contentType: res.headers.get("content-type") });
+
+      return { html, pageUrl, attempts };
+    } catch (err) {
+      attempts.push({
+        url: pageUrl,
+        ok: false,
+        error: safeErrorMessage(err),
+      });
+    }
+  }
+
+  throw new Error(attempts.at(-1)?.error || "page fetch failed");
+}
+
+function collectMatchedAssetUrls(html: string, regex: RegExp) {
+  const normalizedHtml = html.replace(/\\\//g, "/");
+  return uniqueStrings(
+    (normalizedHtml.match(regex) || []).map((url) =>
+      normalizeAssetUrl(url).replace(/\?+$/, "")
+    )
+  );
+}
+
+function scoreBySize(url: string) {
+  const m = url.match(/\/(\d{2,4})x(\d{2,4})\//i);
+  if (m) return Number(m[1]) * Number(m[2]);
+  return 1_000_000_000;
+}
+
+const BG_URL_CACHE = new Map<string, string>();
+
+async function resolveBackgroundImageUrl(backgroundId: string) {
+  const cached = BG_URL_CACHE.get(backgroundId);
+  if (cached) {
+    return {
+      url: cached,
+      debug: {
+        ok: true,
+        source: backgroundId,
+        resolvedUrl: cached,
+        extractedUrls: [cached],
+      } satisfies AssetDebug,
+    };
+  }
+
+  const pageUrls = [
+    `https://solved.ac/en/backgrounds/${encodeURIComponent(backgroundId)}`,
+    `https://solved.ac/backgrounds/${encodeURIComponent(backgroundId)}`,
+  ];
+
+  const { html, pageUrl, attempts } = await fetchHtmlFromCandidates(pageUrls);
+  const id = escRe(backgroundId);
+
+  let urls = collectMatchedAssetUrls(
+    html,
+    new RegExp(
+      String.raw`(?:(?:https?:)?\/\/[^"' <>\n]+)?\/profile_bg\/[^"' <>\n]*${id}[^"' <>\n]*\.(?:avif|jpe?g|png|webp)(?:\?[^"' <>\n]*)?`,
+      "ig"
+    )
+  );
+
+  if (urls.length === 0) {
+    urls = collectMatchedAssetUrls(
+      html,
+      /(?:(?:https?:)?\/\/[^"' <>\n]+)?\/profile_bg\/[^"' <>\n]*\.(?:avif|jpe?g|png|webp)(?:\?[^"' <>\n]*)?/ig
+    );
+  }
+
+  if (urls.length === 0) {
+    throw new Error(`background image url not found for ${backgroundId}`);
+  }
+
+  const best = urls.sort((a, b) => scoreBySize(b) - scoreBySize(a))[0]!;
+  BG_URL_CACHE.set(backgroundId, best);
+
+  return {
+    url: best,
+    debug: {
+      ok: true,
+      source: backgroundId,
+      resolvedUrl: best,
+      pageUrl,
+      pageAttempts: attempts,
+      extractedUrls: urls,
+    } satisfies AssetDebug,
+  };
+}
+
+const BADGE_URL_CACHE = new Map<string, string>();
+
+async function resolveBadgeImageUrlFromBadgePage(badgeId: string) {
+  const cached = BADGE_URL_CACHE.get(badgeId);
+  if (cached) {
+    return {
+      url: cached,
+      debug: {
+        ok: true,
+        source: badgeId,
+        resolvedUrl: cached,
+        extractedUrls: [cached],
+      } satisfies AssetDebug,
+    };
+  }
+
+  const pageUrls = [
+    `https://solved.ac/badges/${encodeURIComponent(badgeId)}`,
+    `https://solved.ac/en/badges/${encodeURIComponent(badgeId)}`,
+  ];
+
+  const { html, pageUrl, attempts } = await fetchHtmlFromCandidates(pageUrls);
+  const id = escRe(badgeId);
+
+  let urls = collectMatchedAssetUrls(
+    html,
+    new RegExp(
+      String.raw`(?:(?:https?:)?\/\/[^"' <>\n]+)?\/profile_badge(?:\/profile)?(?:\/\d{2,4}x\d{2,4})?\/${id}[^"' <>\n]*\.(?:avif|png|svg|webp)(?:\?[^"' <>\n]*)?`,
+      "ig"
+    )
+  );
+
+  if (urls.length === 0) {
+    urls = collectMatchedAssetUrls(
+      html,
+      /(?:(?:https?:)?\/\/[^"' <>\n]+)?\/profile_badge(?:\/profile)?(?:\/\d{2,4}x\d{2,4})?\/[^"' <>\n]*\.(?:avif|png|svg|webp)(?:\?[^"' <>\n]*)?/ig
+    );
+  }
+
+  if (urls.length === 0) {
+    throw new Error(`badge image url not found in badge page for badgeId=${badgeId}`);
+  }
+
+  const best = urls.sort((a, b) => scoreBySize(b) - scoreBySize(a))[0]!;
+  BADGE_URL_CACHE.set(badgeId, best);
+
+  return {
+    url: best,
+    debug: {
+      ok: true,
+      source: badgeId,
+      resolvedUrl: best,
+      pageUrl,
+      pageAttempts: attempts,
+      extractedUrls: urls,
+    } satisfies AssetDebug,
+  };
+}
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
   const handle = (searchParams.get("handle") || "").trim();
+  const debugMode = ["1", "true", "json"].includes(
+    (searchParams.get("debug") || "").trim().toLowerCase()
+  );
+
   if (!handle) {
+    if (debugMode) {
+      return new Response(
+        JSON.stringify({ error: "missing ?handle=..." }, null, 2),
+        { headers: JSON_HEADERS }
+      );
+    }
+
     return new Response(basic.renderErrorCard("missing ?handle=..."), { headers: ERR_HEADERS });
   }
 
   try {
     const u = await fetchSolvedUser(handle);
+    const assets: Record<string, AssetDebug> = {};
 
-    // Tier icon (SVG) - data uri로 인라인 (README 안정)
     const tier = u.tier ?? 0;
-    const tierUrl = `https://static.solved.ac/tier_small/${tier}.svg`;
-    const tierDataUri = await fetchAsDataUriOrEmpty(tierUrl, "image/svg+xml");
+    const tierResult = await fetchAssetFromCandidates(
+      `/tier_small/${tier}.svg`,
+      staticPathCandidates(`/tier_small/${tier}.svg`),
+      "image/svg+xml"
+    );
+    const tierDataUri = tierResult.dataUri;
+    assets.tier = tierResult.debug;
 
-    // Avatar: null이면 solved 기본 이미지 사용
-    const avatarUrl = u.profileImageUrl ?? "https://static.solved.ac/misc/360x360/default_profile.png";
-    const avatarDataUri = await fetchAsDataUriOrEmpty(avatarUrl, "image/png");
+    const avatarSource = u.profileImageUrl || "/misc/360x360/default_profile.png";
+    const avatarResult = await fetchAssetFromCandidates(
+      avatarSource,
+      assetCandidatesFromRaw(avatarSource)
+    );
+    const avatarDataUri = avatarResult.dataUri;
+    assets.avatar = avatarResult.debug;
 
-    // Background (optional)
     let bgDataUri = "";
     const bgId = (u as any).backgroundId as string | undefined;
     if (bgId) {
       try {
-        const bgUrl = await resolveBackgroundImageUrl(bgId);
-        const lower = bgUrl.split("?")[0]!.split("#")[0]!.toLowerCase();
-        const mime =
-          lower.endsWith(".png") ? "image/png" :
-          lower.endsWith(".webp") ? "image/webp" :
-          "image/jpeg";
-        bgDataUri = await fetchAsDataUri(bgUrl, mime);
-      } catch {
-        bgDataUri = "";
+        const bgResolved = await resolveBackgroundImageUrl(bgId);
+        const bgResult = await fetchAssetFromCandidates(bgId, [bgResolved.url]);
+        bgDataUri = bgResult.dataUri;
+        assets.background = {
+          ...bgResolved.debug,
+          ...bgResult.debug,
+          pageUrl: bgResolved.debug.pageUrl,
+          pageAttempts: bgResolved.debug.pageAttempts,
+          extractedUrls: bgResolved.debug.extractedUrls,
+        };
+      } catch (err) {
+        assets.background = {
+          ok: false,
+          source: bgId,
+          error: safeErrorMessage(err),
+        };
       }
+    } else {
+      assets.background = {
+        ok: false,
+        source: null,
+        error: "backgroundId not present in solved.ac user payload",
+      };
     }
 
     let badgeDataUri = "";
     const badgeId = (u as any).badgeId as string | undefined;
-
     if (badgeId) {
       try {
-        const badgeUrl = await resolveBadgeImageUrlFromBadgePage(badgeId);
-        badgeDataUri = await fetchAsDataUri(badgeUrl, "image/png");
-      } catch {
-        badgeDataUri = "";
+        const badgeResolved = await resolveBadgeImageUrlFromBadgePage(badgeId);
+        const badgeResult = await fetchAssetFromCandidates(badgeId, [badgeResolved.url]);
+        badgeDataUri = badgeResult.dataUri;
+        assets.badge = {
+          ...badgeResolved.debug,
+          ...badgeResult.debug,
+          pageUrl: badgeResolved.debug.pageUrl,
+          pageAttempts: badgeResolved.debug.pageAttempts,
+          extractedUrls: badgeResolved.debug.extractedUrls,
+        };
+      } catch (err) {
+        assets.badge = {
+          ok: false,
+          source: badgeId,
+          error: safeErrorMessage(err),
+        };
       }
+    } else {
+      assets.badge = {
+        ok: false,
+        source: null,
+        error: "badgeId not present in solved.ac user payload",
+      };
     }
 
-    // Class icon (optional)
     let classDataUri = "";
     const classNum = (u as any).class as number | undefined;
     const classDeco = ((u as any).classDecoration as string | undefined) || "none";
@@ -205,15 +458,38 @@ export async function GET(req: Request) {
         classDeco === "gold" ? "g" :
         "";
 
-      const classUrl = `https://static.solved.ac/class/c${classNum}${suffix}.svg`;
-
-      try {
-        classDataUri = await fetchAsDataUri(classUrl, "image/svg+xml");
-      } catch {
-        classDataUri = "";
-      }
+      const classPath = `/class/c${classNum}${suffix}.svg`;
+      const classResult = await fetchAssetFromCandidates(
+        classPath,
+        staticPathCandidates(classPath),
+        "image/svg+xml"
+      );
+      classDataUri = classResult.dataUri;
+      assets.class = classResult.debug;
+    } else {
+      assets.class = {
+        ok: false,
+        source: null,
+        error: "class not present or outside supported range",
+      };
     }
 
+    if (debugMode) {
+      return new Response(
+        JSON.stringify(
+          {
+            handle,
+            fetchedAt: new Date().toISOString(),
+            assetBases: SOLVED_ASSET_BASES,
+            user: u,
+            assets,
+          },
+          null,
+          2
+        ),
+        { headers: JSON_HEADERS }
+      );
+    }
 
     const svg = basic.renderCard({
       user: u,
@@ -226,6 +502,22 @@ export async function GET(req: Request) {
 
     return new Response(svg, { headers: OK_HEADERS });
   } catch (e: any) {
+    if (debugMode) {
+      return new Response(
+        JSON.stringify(
+          {
+            handle,
+            fetchedAt: new Date().toISOString(),
+            error: e?.message || "unknown error",
+            assetBases: SOLVED_ASSET_BASES,
+          },
+          null,
+          2
+        ),
+        { headers: JSON_HEADERS }
+      );
+    }
+
     return new Response(basic.renderErrorCard(e?.message || "unknown error"), { headers: ERR_HEADERS });
   }
 }
