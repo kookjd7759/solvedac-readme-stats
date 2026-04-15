@@ -183,6 +183,11 @@ input {
   color: #0f766e;
 }
 
+.status-pill[data-status="preview"] {
+  background: #fffbeb;
+  color: #b45309;
+}
+
 .status-pill[data-status="error"] {
   background: #fff1f2;
   color: #be123c;
