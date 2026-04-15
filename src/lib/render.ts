@@ -330,15 +330,14 @@ export function renderCardV2(input: RenderInput) {
 
   <g clip-path="url(#clipCardV2)">
     <rect x="0" y="0" width="${W}" height="${cardH}" rx="${R}" fill="#FFFFFF"/>
-    <rect x="0.5" y="0.5" width="${W - 1}" height="${cardH - 1}" rx="${R - 0.5}" fill="none" stroke="#D9E2EC"/>
 
     <polygon points="0,0 ${triX},0 ${kneeX},${kneeY} 0,${kneeY}" fill="#FFFFFF"/>
     <g clip-path="url(#clipHeroV2)">
-      <rect x="${triX}" y="0" width="${W - triX}" height="${heroH}" fill="url(#heroFallbackV2)"/>
       ${hasBg
-        ? `<image href="${input.bgDataUri}" x="${triX}" y="0" width="${W - triX}" height="${heroH}" preserveAspectRatio="xMidYMid slice" opacity="0.4"/>`
-        : ''}
-      <rect x="${triX}" y="0" width="${W - triX}" height="${heroH}" fill="#FFFFFF" opacity="0.16"/>
+        ? `<rect x="${triX}" y="0" width="${W - triX}" height="${heroH}" fill="#FFFFFF"/>
+      <image href="${input.bgDataUri}" x="${triX}" y="0" width="${W - triX}" height="${heroH}" preserveAspectRatio="xMidYMid slice" opacity="0.78"/>
+      <rect x="${triX}" y="0" width="${W - triX}" height="${heroH}" fill="#FFFFFF" opacity="0.06"/>`
+        : `<rect x="${triX}" y="0" width="${W - triX}" height="${heroH}" fill="url(#heroFallbackV2)"/>`}
     </g>
 
     <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarOuterR + 2}" fill="url(#avatarRingV2)"/>
@@ -357,6 +356,8 @@ export function renderCardV2(input: RenderInput) {
 
     ${row('Solved', `${solved}`, rowsTop)}
     ${row('Rank', rank ? `#${rank}` : '-', rowsTop + rowH + rowGap)}
+
+    <rect x="0.5" y="0.5" width="${W - 1}" height="${cardH - 1}" rx="${R - 0.5}" fill="none" stroke="#D9E2EC"/>
   </g>
 </svg>`;
 }
