@@ -20,6 +20,18 @@
 
 ## Web Studio
 
+<p align="center">
+  <a href="https://kookjd7759.github.io/solvedac-readme-stats/">
+    <img alt="Open Web Studio" src="https://img.shields.io/badge/Open-Web%20Studio-0f172a?style=for-the-badge&logo=githubpages&logoColor=white" />
+  </a>
+  <a href="https://solvedac-readme-stats.vercel.app/api">
+    <img alt="Open API" src="https://img.shields.io/badge/Open-API-2563eb?style=for-the-badge&logo=vercel&logoColor=white" />
+  </a>
+</p>
+
+Open the web studio here: [https://kookjd7759.github.io/solvedac-readme-stats/](https://kookjd7759.github.io/solvedac-readme-stats/)  
+웹 스튜디오 바로가기: [https://kookjd7759.github.io/solvedac-readme-stats/](https://kookjd7759.github.io/solvedac-readme-stats/)
+
 Use the GitHub Pages web tool to choose `v1` or `v2`, enter any solved.ac handle, preview the card, and download the exact SVG that is rendered on screen.  
 It works especially well if you want to keep one clean profile card as a small souvenir of your solved.ac memories.
 
