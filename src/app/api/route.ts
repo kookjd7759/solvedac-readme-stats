@@ -354,6 +354,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
   const handle = (searchParams.get("handle") || "").trim();
+  const version = (searchParams.get("v") || "1").trim() === "2" ? "2" : "1";
   const debugMode = ["1", "true", "json"].includes(
     (searchParams.get("debug") || "").trim().toLowerCase()
   );
@@ -366,7 +367,12 @@ export async function GET(req: Request) {
       );
     }
 
-    return new Response(basic.renderErrorCard("missing ?handle=..."), { headers: ERR_HEADERS });
+    return new Response(
+      version === "2"
+        ? basic.renderErrorCardV2("missing ?handle=...")
+        : basic.renderErrorCard("missing ?handle=..."),
+      { headers: ERR_HEADERS }
+    );
   }
 
   try {
@@ -479,6 +485,7 @@ export async function GET(req: Request) {
         JSON.stringify(
           {
             handle,
+            version,
             fetchedAt: new Date().toISOString(),
             assetBases: SOLVED_ASSET_BASES,
             user: u,
@@ -491,14 +498,18 @@ export async function GET(req: Request) {
       );
     }
 
-    const svg = basic.renderCard({
+    const renderInput = {
       user: u,
       tierDataUri,
       avatarDataUri,
       bgDataUri,
       badgeDataUri,
       classDataUri,
-    });
+    };
+
+    const svg = version === "2"
+      ? basic.renderCardV2(renderInput)
+      : basic.renderCard(renderInput);
 
     return new Response(svg, { headers: OK_HEADERS });
   } catch (e: any) {
@@ -507,6 +518,7 @@ export async function GET(req: Request) {
         JSON.stringify(
           {
             handle,
+            version,
             fetchedAt: new Date().toISOString(),
             error: e?.message || "unknown error",
             assetBases: SOLVED_ASSET_BASES,
@@ -518,6 +530,11 @@ export async function GET(req: Request) {
       );
     }
 
-    return new Response(basic.renderErrorCard(e?.message || "unknown error"), { headers: ERR_HEADERS });
+    return new Response(
+      version === "2"
+        ? basic.renderErrorCardV2(e?.message || "unknown error")
+        : basic.renderErrorCard(e?.message || "unknown error"),
+      { headers: ERR_HEADERS }
+    );
   }
 }

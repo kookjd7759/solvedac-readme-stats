@@ -1,75 +1,88 @@
+# solvedac-readme-stats
 
-# 🚀 solvedac-readme-stats  
 ![Status](https://img.shields.io/badge/status-early%20access-orange)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![Next.js](https://img.shields.io/badge/Next.js-13+-black)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178C6)
-  
-알고리즘 문제 풀이 사이트인 백준 온라인 저지(BOJ)의 통계를 제공하는 solved.ac의 공개 API를 기반으로  
-GitHub README용 동적 SVG 통계 카드를 생성하는 프로젝트입니다.  
-  
-📊 Display your solved.ac stats beautifully in your GitHub README  
-Inspired by github-readme-stats, powered by the solved.ac API  
-> ⚠️ This project is currently in early development (Demo / Experimental).
-> Features and API may change.
 
-[![Donggyun's solved ac stats](https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759)](https://solved.ac/en/profile/kookjd7759)
+Dynamic SVG solved.ac stat cards for GitHub README profiles.
 
-## 📌 About This Project
-solvedac-readme-stats is a dynamic GitHub README card generator  
-that fetches real-time data from solved.ac and renders it as an SVG image.  
+This project fetches public solved.ac profile data and renders it as an image that can be embedded directly into a GitHub README.
 
-It allows developers to showcase their algorithm-solving achievements  
-directly inside their GitHub profile.  
+[![Donggyun's solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759)](https://solved.ac/en/profile/kookjd7759)
 
-This project was built to create a customizable and aesthetic alternative to existing solved.ac badges.  
+## Usage
 
-## 🛠 Usage  
-Add this to your GitHub README:  
-> Replace `{username}` with your solved.ac (BOJ) handle(ID).  
-> 아래와 같이 작성하며, `{username}`에 자신의 solved.ac 핸들(아이디)을 입력하여 사용하세요.
+Replace `{username}` with your solved.ac handle.
 
 ```markdown
-[![Donggyun's solved ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://github.com/kookjd7759/solvedac-readme-stats)
+[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://solved.ac/en/profile/{username})
 ```
 
+## Card Versions
 
-## 🚀 Deploy Your Own  
-- Fork  
-- Deploy to Vercel  
-- Use your own endpoint
+### v1
 
-## 🧠 About solved.ac  
-solved.ac is a competitive programming profile service built on  
-Baekjoon Online Judge (BOJ).  
-  
-It analyzes solved problems and assigns a tier rating (Bronze → Ruby)  
-to measure problem-solving skills.  
-  
-This project uses the solved.ac public API to render those stats  
-as dynamic SVG cards for GitHub READMEs.  
-  
-## 🧑‍💻 Development
+Classic layout.
 
-First, run the development server:
+If you omit the version parameter, `v=1` is used by default.
+
+```markdown
+[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://solved.ac/en/profile/{username})
+```
+
+Explicit `v=1` example:
+
+```markdown
+[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=1)](https://solved.ac/en/profile/{username})
+```
+
+### v2
+
+Minimal border layout with the solved background area applied to the top section.
+
+```markdown
+[![solved.ac stats v2](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2)](https://solved.ac/en/profile/{username})
+```
+
+## Example URLs
+
+- `v=1`: `https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759`
+- `v=2`: `https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2`
+
+## Query Parameters
+
+- `handle`: solved.ac handle
+- `v`: card version (`1` or `2`)
+- `debug`: return JSON debug output with `1`, `true`, or `json`
+
+## Deploy Your Own
+
+1. Fork this repository.
+2. Deploy it to Vercel.
+3. Use your own deployed `/api` endpoint in your README.
+
+## Development
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Example local test URLs:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `http://localhost:3000/api?handle=kookjd7759`
+- `http://localhost:3000/api?handle=kookjd7759&v=2`
 
-## 📄 License
+## About solved.ac
 
-Distributed under the MIT License.  
-See `LICENSE` for more information.
+solved.ac is a competitive programming profile service built around Baekjoon Online Judge (BOJ).
+
+This project uses solved.ac public profile data to generate dynamic README cards.
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
