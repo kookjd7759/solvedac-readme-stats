@@ -275,6 +275,7 @@ export function renderCardV2(input: RenderInput) {
     const rowX = 18;
     const rowW = W - rowX * 2;
     const rowsTop = 160;
+    const upperStroke = '#D8E4F0';
     const badgeSize = 50;
     const badgeX = avatarCx + avatarR - badgeSize / 2 + 40;
     const badgeY = avatarCy + avatarR - badgeSize / 2 - 20;
@@ -340,6 +341,9 @@ export function renderCardV2(input: RenderInput) {
         : `<rect x="${triX}" y="0" width="${W - triX}" height="${heroH}" fill="url(#heroFallbackV2)"/>`}
     </g>
 
+    <line x1="${triX}" y1="0" x2="${kneeX}" y2="${kneeY}" stroke="${upperStroke}" stroke-width="0.9" stroke-linecap="round"/>
+    <line x1="0" y1="${kneeY}" x2="${W}" y2="${kneeY}" stroke="${upperStroke}" stroke-width="0.9" stroke-linecap="round"/>
+
     <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarOuterR + 2}" fill="url(#avatarRingV2)"/>
     <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarOuterR + 1}" fill="none" stroke="#DCE4EE"/>
     <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarR + 1}" fill="none" stroke="${accent}" stroke-opacity="0.22"/>
@@ -353,7 +357,6 @@ export function renderCardV2(input: RenderInput) {
     <text x="${nameX}" y="${nameY}" fill="#0F172A" font-size="${handleFontSize}" font-weight="900" font-family="${font}">
       ${handle}
     </text>
-
     ${row('Solved', `${solved}`, rowsTop)}
     ${row('Rank', rank ? `#${rank}` : '-', rowsTop + rowH + rowGap)}
 
