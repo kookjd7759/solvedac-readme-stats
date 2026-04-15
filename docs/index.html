@@ -6,7 +6,7 @@
     <title>solvedac-readme-stats Web Studio</title>
     <meta
       name="description"
-      content="Preview solved.ac README cards on GitHub Pages and download them as PNG."
+      content="Preview solved.ac README cards on GitHub Pages and download the rendered SVG."
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -15,12 +15,13 @@
       <section class="hero-card">
         <div class="hero-copy">
           <p class="eyebrow">solved.ac README card studio</p>
-          <h1>Open on GitHub Pages, preview instantly, download as PNG.</h1>
+          <h1>Preview instantly, then download the exact SVG card.</h1>
           <p class="hero-text">
-            Choose a card version, enter a solved.ac handle, and render the card directly in the browser.
+            Choose a card version, enter any solved.ac handle, and render the card directly in the browser.
           </p>
           <p class="hero-text hero-text-ko">
-            버전을 고르고 solved.ac 핸들을 입력하면 브라우저에서 바로 카드 미리보기를 확인하고 PNG로 저장할 수 있습니다.
+            카드 버전을 고르고 solved.ac handle을 입력하면 브라우저에서 바로 미리보기를 확인하고,
+            화면에 보이는 그대로 SVG 파일로 저장할 수 있습니다.
           </p>
         </div>
         <a
@@ -38,9 +39,9 @@
           <div class="section-head">
             <div>
               <h2>Card Controls</h2>
-              <p>버전 선택과 핸들 입력 후 OK를 누르세요.</p>
+              <p>버전을 선택하고 handle을 입력한 뒤 OK를 누르세요.</p>
             </div>
-            <span class="status-pill" id="status-pill">ready</span>
+            <span class="status-pill" id="status-pill">idle</span>
           </div>
 
           <div class="field-group">
@@ -48,8 +49,8 @@
             <input
               id="handle-input"
               type="text"
-              value="kookjd7759"
-              placeholder="kookjd7759"
+              value=""
+              placeholder="your-solved-handle"
               autocomplete="off"
             />
           </div>
@@ -73,17 +74,17 @@
           <div class="button-row">
             <button type="button" id="render-button" class="primary-button">OK</button>
             <button type="button" id="download-button" class="secondary-button" disabled>
-              Download PNG
+              Download SVG
             </button>
           </div>
 
           <div class="info-card">
             <p class="info-label">api url</p>
-            <code id="api-url">https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2</code>
+            <code id="api-url">Enter a handle to generate the API URL.</code>
           </div>
 
           <div class="message-card" id="message-card">
-            Enter a handle and render a card.
+            Enter your solved.ac handle to render a card preview.
           </div>
         </aside>
 
@@ -96,9 +97,8 @@
             <a
               id="open-svg-link"
               class="preview-link"
-              href="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2"
-              target="_blank"
-              rel="noreferrer"
+              href="#"
+              aria-disabled="true"
             >
               Open SVG
             </a>
@@ -107,7 +107,9 @@
           <div class="preview-stage">
             <div class="preview-empty" id="preview-empty">
               <p class="preview-empty-title">No preview yet</p>
-              <p class="preview-empty-copy">OK를 누르면 카드 이미지가 여기에 표시됩니다.</p>
+              <p class="preview-empty-copy">
+                handle을 입력하고 OK를 누르면 카드가 여기 표시됩니다.
+              </p>
             </div>
             <img
               id="preview-image"

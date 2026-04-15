@@ -375,6 +375,14 @@ input {
   text-transform: uppercase;
 }
 
+.preview-link[aria-disabled="true"] {
+  cursor: not-allowed;
+  border-color: var(--line-soft);
+  background: #f8fafc;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
 .preview-stage {
   display: flex;
   align-items: center;

@@ -13,8 +13,8 @@
 
 ## Web Studio
 
-Use the GitHub Pages web tool to choose `v1` or `v2`, enter a solved.ac handle, preview the card, and download it as PNG.  
-GitHub Pages 웹에서 `v1`, `v2`를 고르고 solved.ac 핸들을 입력한 뒤, 카드 미리보기와 PNG 다운로드를 바로 할 수 있습니다.
+Use the GitHub Pages web tool to choose `v1` or `v2`, enter any solved.ac handle, preview the card, and download the exact SVG that is rendered on screen.  
+GitHub Pages 웹에서 `v1`, `v2`를 고르고 solved.ac 핸들을 입력한 뒤, 화면에 렌더링된 카드를 그대로 SVG로 다운로드할 수 있습니다.
 
 - Web Studio: [https://kookjd7759.github.io/solvedac-readme-stats/](https://kookjd7759.github.io/solvedac-readme-stats/)
 - API Base: [https://solvedac-readme-stats.vercel.app/api](https://solvedac-readme-stats.vercel.app/api)
@@ -88,8 +88,8 @@ Minimal border layout with the solved background area applied to the top section
 
 Ready-to-test example URLs.  
 
-- `v=1`: `https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=1`
-- `v=2`: `https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2`
+- `v=1`: `https://solvedac-readme-stats.vercel.app/api?handle={username}&v=1`
+- `v=2`: `https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2`
 
 ## Query Parameters
 
@@ -97,13 +97,14 @@ Available query parameters.
 
 - `handle`: solved.ac handle  
 - `v`: card version (`1` or `2`)  
+- `download`: return the SVG as an attachment when set to `1`, `true`, or `yes`  
 - `debug`: return JSON debug output with `1`, `true`, or `json`  
 
 ## GitHub Pages
 
 This repository includes a static GitHub Pages app in [`docs/`](./docs) and a deployment workflow in [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml).  
 
-The Pages app uses the deployed Vercel API to render cards and convert them to PNG in the browser.  
+The Pages app uses the deployed Vercel API to render cards and download the exact SVG response.  
 
 ## Deploy Your Own
 
@@ -127,8 +128,8 @@ Then open [http://localhost:3000](http://localhost:3000).
 Example local test URLs.  
 
 - `http://localhost:3000/`
-- `http://localhost:3000/api?handle=kookjd7759&v=1`
-- `http://localhost:3000/api?handle=kookjd7759&v=2`
+- `http://localhost:3000/api?handle={username}&v=1`
+- `http://localhost:3000/api?handle={username}&v=2`
 
 ## About solved.ac
 

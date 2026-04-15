@@ -1,6 +1,5 @@
-export const runtime = "nodejs";
+export const runtime = "edge";
 
-import sharp from "sharp";
 import { fetchSolvedUser } from "../../lib/solvedac";
 import * as basic from "../../lib/render";
 
@@ -9,12 +8,6 @@ const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Methods": "GET, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
   "Cross-Origin-Resource-Policy": "cross-origin",
-};
-
-const ERR_HEADERS: Record<string, string> = {
-  ...CORS_HEADERS,
-  "Content-Type": "image/svg+xml",
-  "Cache-Control": "no-store",
 };
 
 const JSON_HEADERS: Record<string, string> = {
@@ -41,8 +34,6 @@ type AssetDebug = {
   error?: string;
 };
 
-type RenderFormat = "svg" | "png";
-
 function uniqueStrings(values: string[]) {
   return [...new Set(values.filter(Boolean))];
 }
@@ -62,10 +53,6 @@ function truthyParam(value: string | null) {
   return normalized === "1" || normalized === "true" || normalized === "yes";
 }
 
-function normalizeFormat(value: string | null): RenderFormat {
-  return (value || "").trim().toLowerCase() === "png" ? "png" : "svg";
-}
-
 function sanitizeFilenameSegment(value: string) {
   const normalized = value
     .trim()
@@ -76,13 +63,12 @@ function sanitizeFilenameSegment(value: string) {
 }
 
 function buildImageHeaders(
-  contentType: string,
   cacheControl: string,
   fileName?: string
 ): Record<string, string> {
   const headers: Record<string, string> = {
     ...CORS_HEADERS,
-    "Content-Type": contentType,
+    "Content-Type": "image/svg+xml",
     "Cache-Control": cacheControl,
   };
 
@@ -99,21 +85,13 @@ function bytesToBase64(bytes: Uint8Array) {
   return btoa(bin);
 }
 
-async function renderImageResponse(
+function renderSvgResponse(
   svg: string,
-  format: RenderFormat,
   cacheControl: string,
   fileName?: string
 ) {
-  if (format === "png") {
-    const png = await sharp(Buffer.from(svg), { density: 192 }).png().toBuffer();
-    return new Response(new Uint8Array(png), {
-      headers: buildImageHeaders("image/png", cacheControl, fileName),
-    });
-  }
-
   return new Response(svg, {
-    headers: buildImageHeaders("image/svg+xml", cacheControl, fileName),
+    headers: buildImageHeaders(cacheControl, fileName),
   });
 }
 
@@ -416,13 +394,12 @@ export async function GET(req: Request) {
 
   const handle = (searchParams.get("handle") || "").trim();
   const version = (searchParams.get("v") || "1").trim() === "2" ? "2" : "1";
-  const format = normalizeFormat(searchParams.get("format"));
   const shouldDownload = truthyParam(searchParams.get("download"));
   const debugMode = ["1", "true", "json"].includes(
     (searchParams.get("debug") || "").trim().toLowerCase()
   );
   const fileName = shouldDownload
-    ? `solvedac-${sanitizeFilenameSegment(handle || "card")}-v${version}.${format}`
+    ? `solvedac-${sanitizeFilenameSegment(handle || "card")}-v${version}.svg`
     : undefined;
 
   if (!handle) {
@@ -433,11 +410,10 @@ export async function GET(req: Request) {
       );
     }
 
-    return await renderImageResponse(
+    return renderSvgResponse(
       version === "2"
         ? basic.renderErrorCardV2("missing ?handle=...")
         : basic.renderErrorCard("missing ?handle=..."),
-      format,
       "no-store",
       fileName
     );
@@ -579,9 +555,8 @@ export async function GET(req: Request) {
       ? basic.renderCardV2(renderInput)
       : basic.renderCard(renderInput);
 
-    return await renderImageResponse(
+    return renderSvgResponse(
       svg,
-      format,
       "public, max-age=0, s-maxage=900, stale-while-revalidate=86400",
       fileName
     );
@@ -603,11 +578,10 @@ export async function GET(req: Request) {
       );
     }
 
-    return await renderImageResponse(
+    return renderSvgResponse(
       version === "2"
         ? basic.renderErrorCardV2(e?.message || "unknown error")
         : basic.renderErrorCard(e?.message || "unknown error"),
-      format,
       "no-store",
       fileName
     );

@@ -1,99 +1,113 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useMemo, useState } from 'react';
 
 type CardVersion = '1' | '2';
 
-const defaultHandle = 'kookjd7759';
 const cardVersions: { value: CardVersion; label: string; note: string }[] = [
   { value: '1', label: 'v1', note: 'Classic layout' },
   { value: '2', label: 'v2', note: 'Minimal layout' },
 ];
 
-function buildPreviewUrl(handle: string, version: CardVersion) {
-  const params = new URLSearchParams({ handle: handle.trim(), v: version });
+function buildApiUrl(
+  handle: string,
+  version: CardVersion,
+  options?: { download?: boolean; cacheKey?: string }
+) {
+  const nextHandle = handle.trim();
+  if (!nextHandle) return '';
+
+  const params = new URLSearchParams({ handle: nextHandle, v: version });
+
+  if (options?.download) {
+    params.set('download', '1');
+  }
+
+  if (options?.cacheKey) {
+    params.set('_preview', options.cacheKey);
+  }
+
   return `/api?${params.toString()}`;
 }
 
+function buildDownloadFilename(handle: string, version: CardVersion) {
+  const safeHandle =
+    handle
+      .trim()
+      .replace(/[^a-z0-9_-]+/gi, '-')
+      .replace(/^-+|-+$/g, '') || 'card';
+
+  return `solvedac-${safeHandle}-v${version}.svg`;
+}
+
 export default function Home() {
-  const [draftHandle, setDraftHandle] = useState(defaultHandle);
+  const [draftHandle, setDraftHandle] = useState('');
   const [draftVersion, setDraftVersion] = useState<CardVersion>('2');
-  const [submittedHandle, setSubmittedHandle] = useState(defaultHandle);
+  const [submittedHandle, setSubmittedHandle] = useState('');
   const [submittedVersion, setSubmittedVersion] = useState<CardVersion>('2');
+  const [renderToken, setRenderToken] = useState('');
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [downloadError, setDownloadError] = useState<string>('');
-  const [isPending, startTransition] = useTransition();
+  const [statusMessage, setStatusMessage] = useState(
+    'Enter your solved.ac handle to render a card preview.'
+  );
+  const [statusTone, setStatusTone] = useState<'neutral' | 'error'>('neutral');
+
+  const draftPreviewUrl = useMemo(
+    () => buildApiUrl(draftHandle, draftVersion),
+    [draftHandle, draftVersion]
+  );
 
   const previewUrl = useMemo(
-    () => buildPreviewUrl(submittedHandle, submittedVersion),
-    [submittedHandle, submittedVersion]
+    () =>
+      buildApiUrl(submittedHandle, submittedVersion, {
+        cacheKey: renderToken || undefined,
+      }),
+    [submittedHandle, submittedVersion, renderToken]
   );
 
   function handleSubmit() {
     const nextHandle = draftHandle.trim();
-    if (!nextHandle) return;
+    if (!nextHandle) {
+      setSubmittedHandle('');
+      setImageLoaded(false);
+      setStatusTone('error');
+      setStatusMessage('Please enter a solved.ac handle. / solved.ac handle을 입력해 주세요.');
+      return;
+    }
 
-    setDownloadError('');
     setImageLoaded(false);
-
-    startTransition(() => {
-      setSubmittedHandle(nextHandle);
-      setSubmittedVersion(draftVersion);
-    });
+    setStatusTone('neutral');
+    setStatusMessage('Preview is loading... / 미리보기를 불러오는 중입니다.');
+    setSubmittedHandle(nextHandle);
+    setSubmittedVersion(draftVersion);
+    setRenderToken(Date.now().toString());
   }
 
-  async function handleDownloadPng() {
-    try {
-      setDownloadError('');
-
-      const response = await fetch(previewUrl, { cache: 'no-store' });
-      if (!response.ok) {
-        throw new Error('Failed to fetch card image.');
-      }
-
-      const svgText = await response.text();
-      const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
-      const svgUrl = URL.createObjectURL(svgBlob);
-
-      try {
-        const image = await loadImage(svgUrl);
-        const scale = 2;
-        const canvas = document.createElement('canvas');
-        canvas.width = image.naturalWidth * scale;
-        canvas.height = image.naturalHeight * scale;
-
-        const context = canvas.getContext('2d');
-        if (!context) {
-          throw new Error('Canvas is not available in this browser.');
-        }
-
-        context.scale(scale, scale);
-        context.drawImage(image, 0, 0);
-
-        const pngBlob = await canvasToBlob(canvas);
-        const downloadUrl = URL.createObjectURL(pngBlob);
-
-        try {
-          const link = document.createElement('a');
-          link.href = downloadUrl;
-          link.download = `solvedac-${submittedHandle}-v${submittedVersion}.png`;
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-        } finally {
-          URL.revokeObjectURL(downloadUrl);
-        }
-      } finally {
-        URL.revokeObjectURL(svgUrl);
-      }
-    } catch (error) {
-      setDownloadError(
-        error instanceof Error ? error.message : 'PNG download failed.'
-      );
+  function handleDownloadSvg() {
+    if (!submittedHandle) {
+      setStatusTone('error');
+      setStatusMessage('Render a card before downloading. / 다운로드 전에 먼저 카드를 렌더링해 주세요.');
+      return;
     }
+
+    const downloadUrl = buildApiUrl(submittedHandle, submittedVersion, {
+      download: true,
+      cacheKey: Date.now().toString(),
+    });
+
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = buildDownloadFilename(submittedHandle, submittedVersion);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setStatusTone('neutral');
+    setStatusMessage('SVG download started. / SVG 다운로드가 시작되었습니다.');
   }
 
   const canSubmit = draftHandle.trim().length > 0;
+  const downloadReady = imageLoaded && submittedHandle.length > 0;
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_48%,#fdf8f0_100%)] px-5 py-8 text-slate-950 sm:px-8 lg:px-10">
@@ -106,13 +120,13 @@ export default function Home() {
             </span>
             <div className="flex flex-col gap-3 lg:max-w-3xl">
               <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-                Build a solved.ac card and export it as PNG
+                Preview the card, then download the exact SVG.
               </h1>
               <p className="max-w-2xl text-sm font-medium leading-7 text-slate-600 sm:text-base">
-                Version 1 and 2 can be previewed from the web page, and the generated card can be saved as a PNG in one click.
+                Choose version 1 or 2, enter any solved.ac handle, and render the card directly in the browser.
               </p>
               <p className="max-w-2xl text-sm font-medium leading-7 text-slate-500 sm:text-base">
-                웹에서 바로 버전을 선택하고 solved.ac 핸들을 입력한 뒤, 미리보기 확인과 PNG 다운로드까지 한 번에 할 수 있습니다.
+                solved.ac handle만 입력하면 카드 미리보기를 바로 확인하고, 화면에 보이는 그대로 SVG 파일로 저장할 수 있습니다.
               </p>
             </div>
           </div>
@@ -126,7 +140,7 @@ export default function Home() {
                   Card Controls
                 </h2>
                 <p className="mt-1 text-sm font-medium text-slate-500">
-                  버전과 핸들을 선택한 뒤 오른쪽에서 결과를 확인하세요.
+                  버전과 handle을 선택한 뒤 오른쪽에서 결과를 확인하세요.
                 </p>
               </div>
               <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
@@ -142,7 +156,13 @@ export default function Home() {
                 <input
                   value={draftHandle}
                   onChange={(event) => setDraftHandle(event.target.value)}
-                  placeholder="kookjd7759"
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      handleSubmit();
+                    }
+                  }}
+                  placeholder="your-solved-handle"
                   className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-semibold text-slate-900 outline-none transition focus:border-sky-300 focus:bg-white focus:ring-4 focus:ring-sky-100"
                 />
               </div>
@@ -179,18 +199,18 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={!canSubmit || isPending}
+                  disabled={!canSubmit}
                   className="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
-                  {isPending ? 'Loading...' : 'OK'}
+                  OK
                 </button>
                 <button
                   type="button"
-                  onClick={handleDownloadPng}
-                  disabled={!imageLoaded}
+                  onClick={handleDownloadSvg}
+                  disabled={!downloadReady}
                   className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
                 >
-                  Download PNG
+                  Download SVG
                 </button>
               </div>
 
@@ -199,15 +219,19 @@ export default function Home() {
                   preview url
                 </div>
                 <code className="mt-2 block break-all text-sm font-semibold text-slate-700">
-                  {previewUrl}
+                  {draftPreviewUrl || 'Enter a handle to generate the API URL.'}
                 </code>
               </div>
 
-              {downloadError ? (
-                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-                  {downloadError}
-                </div>
-              ) : null}
+              <div
+                className={`rounded-2xl px-4 py-3 text-sm font-semibold ${
+                  statusTone === 'error'
+                    ? 'border border-rose-200 bg-rose-50 text-rose-700'
+                    : 'border border-slate-200 bg-slate-50 text-slate-700'
+                }`}
+              >
+                {statusMessage}
+              </div>
             </div>
           </div>
 
@@ -218,24 +242,45 @@ export default function Home() {
                   Preview
                 </h2>
                 <p className="mt-1 text-sm font-medium text-slate-500">
-                  오른쪽 카드 이미지는 선택한 버전과 핸들로 다시 렌더링됩니다.
+                  렌더링된 카드는 오른쪽에서 바로 확인할 수 있습니다.
                 </p>
               </div>
               <div className="inline-flex w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
-                {submittedHandle} / v{submittedVersion}
+                {submittedHandle ? `${submittedHandle} / v${submittedVersion}` : 'ready'}
               </div>
             </div>
 
             <div className="mt-5 rounded-[28px] border border-slate-200 bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.08),_transparent_42%),linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-4 sm:p-6">
               <div className="flex min-h-[360px] items-center justify-center rounded-[24px] border border-dashed border-slate-200 bg-white/90 p-3 sm:p-6">
-                <img
-                  key={previewUrl}
-                  src={previewUrl}
-                  alt={`solved.ac card preview for ${submittedHandle}`}
-                  onLoad={() => setImageLoaded(true)}
-                  onError={() => setImageLoaded(false)}
-                  className="h-auto w-full max-w-[760px] rounded-[22px]"
-                />
+                {previewUrl ? (
+                  <img
+                    key={previewUrl}
+                    src={previewUrl}
+                    alt={`solved.ac card preview for ${submittedHandle}`}
+                    onLoad={() => {
+                      setImageLoaded(true);
+                      setStatusTone('neutral');
+                      setStatusMessage(
+                        'Preview updated. Download SVG saves the exact card you see on screen. / 미리보기가 갱신되었습니다. Download SVG는 지금 화면에 보이는 카드를 그대로 저장합니다.'
+                      );
+                    }}
+                    onError={() => {
+                      setImageLoaded(false);
+                      setStatusTone('error');
+                      setStatusMessage(
+                        'Failed to load the preview image. / 미리보기 이미지를 불러오지 못했습니다.'
+                      );
+                    }}
+                    className="h-auto w-full max-w-[760px] rounded-[22px]"
+                  />
+                ) : (
+                  <div className="text-center text-slate-500">
+                    <p className="text-2xl font-black text-slate-700">No preview yet</p>
+                    <p className="mt-3 text-sm font-medium">
+                      handle을 입력하고 OK를 누르면 카드가 여기 표시됩니다.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -243,26 +288,4 @@ export default function Home() {
       </div>
     </main>
   );
-}
-
-function loadImage(src: string) {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error('Unable to load SVG preview.'));
-    image.src = src;
-  });
-}
-
-function canvasToBlob(canvas: HTMLCanvasElement) {
-  return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        reject(new Error('Unable to export PNG.'));
-        return;
-      }
-
-      resolve(blob);
-    }, 'image/png');
-  });
 }
