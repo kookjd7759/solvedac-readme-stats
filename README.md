@@ -12,18 +12,11 @@
 > solved.ac 공개 프로필 데이터를 불러와 README에 붙여 넣기 좋은 카드 이미지로 렌더링합니다.
 
 ## A Small Keepsake
+ solved.ac에서의 시간을 작은 기념 카드로 남기고 싶다면, 이 프로젝트로 지금의 프로필을 카드로 만들어 간직할 수 있습니다.  
 
-If you want to keep a small memory of your solved.ac journey, this project can turn your current profile into a card you can save and keep.  
-Even if time passes, you can keep one snapshot of your tier, streak, rank, badge, and background from this moment.
-
-solved.ac에서의 시간을 작은 기념 카드로 남기고 싶다면, 이 프로젝트로 지금의 프로필을 카드로 만들어 간직할 수 있습니다.  
 티어, 스트릭, 랭크, 뱃지, 배경처럼 지금 이 순간의 기록을 하나의 스냅샷으로 남겨 두고 나중에 다시 꺼내볼 수 있게 하자는 마음으로 만들었습니다.
 
-With the recent news that BOJ itself may be coming to an end, I wanted this project to feel a little more like a final gift.  
-If you want to remember your own profile, rank, streak, badge, and background from this era, you can make one card and keep it.
-
-최근 BOJ 자체가 끝을 향해 갈 수 있다는 소식을 보고, 이 프로젝트를 조금 더 마지막 선물 같은 느낌으로 남기고 싶었습니다.  
-이 시기의 내 프로필, 랭크, 스트릭, 뱃지, 배경을 기억하고 싶다면 카드 한 장으로 만들어 간직해 두면 좋겠다는 마음입니다.
+ 최근 BOJ 자체가 끝을 향해 갈 수 있다는 소식을 보고, 이 프로젝트를 조금 더 마지막 선물 같은 느낌으로 남기고 싶었습니다. 이 시기의 내 프로필, 랭크, 스트릭, 뱃지, 배경을 기억하고 싶다면 카드 한 장으로 만들어 간직해 두면 좋겠다는 마음입니다.
 
 ## Web Studio
 
