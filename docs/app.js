@@ -11,14 +11,12 @@ const elements = {
   apiUrl: document.querySelector("#api-url"),
   openSvgLink: document.querySelector("#open-svg-link"),
   versionCards: Array.from(document.querySelectorAll(".version-card")),
-  versionInputs: Array.from(document.querySelectorAll('input[name="version"]')),
 };
 
 const state = {
   handle: "kookjd7759",
   version: "2",
   svgText: "",
-  previewObjectUrl: "",
 };
 
 boot();
@@ -39,6 +37,21 @@ function boot() {
   elements.handleInput.addEventListener("input", () => {
     state.handle = elements.handleInput.value.trim();
     syncApiUrl();
+  });
+
+  elements.previewImage.addEventListener("load", () => {
+    elements.previewImage.hidden = false;
+    elements.previewEmpty.hidden = true;
+  });
+
+  elements.previewImage.addEventListener("error", () => {
+    hidePreview();
+    setStatus("error");
+    setMessage(
+      "The preview image could not be loaded. Check the handle and open the SVG link once. / " +
+        "미리보기 이미지를 불러오지 못했습니다. handle 값을 확인하고 Open SVG 링크를 한 번 열어 주세요.",
+      true
+    );
   });
 
   elements.renderButton.addEventListener("click", renderCard);
@@ -64,6 +77,12 @@ function buildApiUrl() {
   return url.toString();
 }
 
+function buildPreviewUrl() {
+  const url = new URL(buildApiUrl());
+  url.searchParams.set("_preview", Date.now().toString());
+  return url.toString();
+}
+
 function syncApiUrl() {
   const apiUrl = buildApiUrl();
   elements.apiUrl.textContent = apiUrl;
@@ -72,70 +91,85 @@ function syncApiUrl() {
 
 async function renderCard() {
   if (!state.handle) {
-    setMessage("Please enter a solved.ac handle. / solved.ac 핸들을 입력해 주세요.", true);
+    state.svgText = "";
+    hidePreview();
+    elements.downloadButton.disabled = true;
+    setStatus("error");
+    setMessage(
+      "Please enter a solved.ac handle. / solved.ac handle을 입력해 주세요.",
+      true
+    );
     return;
   }
 
-  setStatus("loading");
-  setMessage("Rendering card... / 카드를 렌더링하는 중입니다.", false);
+  const apiUrl = buildApiUrl();
+  const previewUrl = buildPreviewUrl();
+
+  state.svgText = "";
   elements.downloadButton.disabled = true;
+  setStatus("loading");
+  setMessage(
+    "Preview is loading. PNG download will unlock after the SVG fetch succeeds. / " +
+      "미리보기를 불러오는 중입니다. SVG fetch가 성공하면 PNG 다운로드가 활성화됩니다.",
+    false
+  );
+
+  showRemotePreview(previewUrl);
 
   try {
-    const apiUrl = buildApiUrl();
     const response = await fetch(apiUrl, { mode: "cors", cache: "no-store" });
 
     if (!response.ok) {
       throw new Error("The card API did not return a successful response.");
     }
 
-    const svgText = await response.text();
-    state.svgText = svgText;
-    showPreview(svgText);
+    state.svgText = await response.text();
     elements.downloadButton.disabled = false;
     setStatus("ready");
-    setMessage("Preview updated. You can now download it as PNG. / 미리보기가 갱신되었습니다. 이제 PNG로 다운로드할 수 있습니다.", false);
-  } catch (error) {
-    hidePreview();
-    setStatus("error");
     setMessage(
-      error instanceof Error
-        ? `${error.message} / 카드 미리보기를 불러오지 못했습니다.`
-        : "Preview rendering failed. / 카드 미리보기 렌더링에 실패했습니다.",
-      true
+      "Preview updated. You can now download it as PNG. / 미리보기가 갱신되었습니다. 이제 PNG로 다운로드할 수 있습니다.",
+      false
+    );
+  } catch (error) {
+    setStatus("preview");
+    setMessage(
+      (error instanceof Error ? error.message : "Failed to fetch the SVG for PNG export.") +
+        " / 미리보기는 표시될 수 있지만 PNG 다운로드는 아직 준비되지 않았습니다. " +
+        "Vercel API에 CORS 헤더가 반영되도록 다시 배포한 뒤 다시 시도해 주세요.",
+      false
     );
   }
 }
 
-function showPreview(svgText) {
-  clearPreviewObjectUrl();
-
-  const svgBlob = new Blob([svgText], {
-    type: "image/svg+xml;charset=utf-8",
-  });
-
-  state.previewObjectUrl = URL.createObjectURL(svgBlob);
-  elements.previewImage.src = state.previewObjectUrl;
+function showRemotePreview(previewUrl) {
   elements.previewImage.hidden = false;
   elements.previewEmpty.hidden = true;
+  elements.previewImage.src = previewUrl;
 }
 
 function hidePreview() {
-  clearPreviewObjectUrl();
   elements.previewImage.hidden = true;
   elements.previewImage.removeAttribute("src");
   elements.previewEmpty.hidden = false;
-  elements.downloadButton.disabled = true;
 }
 
 async function downloadPng() {
   if (!state.svgText) {
-    setMessage("Render a card first. / 먼저 카드를 렌더링해 주세요.", true);
+    setStatus("error");
+    setMessage(
+      "PNG download is not ready yet. The preview can still show, but PNG export needs a successful SVG fetch first. / " +
+        "아직 PNG 다운로드를 준비하지 못했습니다. 미리보기는 보여도 PNG 내보내기는 SVG fetch가 먼저 성공해야 합니다.",
+      true
+    );
     return;
   }
 
   try {
     setStatus("loading");
-    setMessage("Preparing PNG download... / PNG 다운로드를 준비하는 중입니다.", false);
+    setMessage(
+      "Preparing PNG download... / PNG 다운로드를 준비하는 중입니다.",
+      false
+    );
 
     const svgBlob = new Blob([state.svgText], {
       type: "image/svg+xml;charset=utf-8",
@@ -176,22 +210,18 @@ async function downloadPng() {
     }
 
     setStatus("ready");
-    setMessage("PNG download started. / PNG 다운로드가 시작되었습니다.", false);
+    setMessage(
+      "PNG download started. / PNG 다운로드가 시작되었습니다.",
+      false
+    );
   } catch (error) {
     setStatus("error");
     setMessage(
-      error instanceof Error
-        ? `${error.message} / PNG 다운로드에 실패했습니다.`
-        : "PNG download failed. / PNG 다운로드에 실패했습니다.",
+      (error instanceof Error ? error.message : "PNG download failed.") +
+        " / PNG 다운로드에 실패했습니다.",
       true
     );
   }
-}
-
-function clearPreviewObjectUrl() {
-  if (!state.previewObjectUrl) return;
-  URL.revokeObjectURL(state.previewObjectUrl);
-  state.previewObjectUrl = "";
 }
 
 function setStatus(status) {
