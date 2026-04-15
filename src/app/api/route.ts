@@ -3,17 +3,27 @@ export const runtime = "edge";
 import { fetchSolvedUser } from "../../lib/solvedac";
 import * as basic from "../../lib/render";
 
+const CORS_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Cross-Origin-Resource-Policy": "cross-origin",
+};
+
 const OK_HEADERS: Record<string, string> = {
+  ...CORS_HEADERS,
   "Content-Type": "image/svg+xml",
   "Cache-Control": "public, max-age=0, s-maxage=900, stale-while-revalidate=86400",
 };
 
 const ERR_HEADERS: Record<string, string> = {
+  ...CORS_HEADERS,
   "Content-Type": "image/svg+xml",
   "Cache-Control": "no-store",
 };
 
 const JSON_HEADERS: Record<string, string> = {
+  ...CORS_HEADERS,
   "Content-Type": "application/json; charset=utf-8",
   "Cache-Control": "no-store",
 };
@@ -537,4 +547,8 @@ export async function GET(req: Request) {
       { headers: ERR_HEADERS }
     );
   }
+}
+
+export async function OPTIONS() {
+  return new Response(null, { headers: CORS_HEADERS });
 }

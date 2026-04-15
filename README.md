@@ -6,10 +6,18 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178C6)
 
 > Dynamic SVG solved.ac stat cards for GitHub README profiles.  
-> This project fetches public solved.ac profile data and renders it as an image that can be embedded directly into your README.
-> 
 > GitHub README 프로필에 넣을 수 있는 solved.ac 동적 SVG 카드입니다.
+>
+> This project fetches public solved.ac profile data and renders it as an image that can be embedded directly into your README.  
 > solved.ac 공개 프로필 데이터를 불러와 README에 바로 넣을 수 있는 이미지 카드로 렌더링합니다.
+
+## Web Studio
+
+Use the GitHub Pages web tool to choose `v1` or `v2`, enter a solved.ac handle, preview the card, and download it as PNG.  
+GitHub Pages 웹에서 `v1`, `v2`를 고르고 solved.ac 핸들을 입력한 뒤, 카드 미리보기와 PNG 다운로드를 바로 할 수 있습니다.
+
+- Web Studio: [https://kookjd7759.github.io/solvedac-readme-stats/](https://kookjd7759.github.io/solvedac-readme-stats/)
+- API Base: [https://solvedac-readme-stats.vercel.app/api](https://solvedac-readme-stats.vercel.app/api)
 
 ## Preview
 
@@ -48,7 +56,7 @@ Replace `{username}` with your solved.ac handle.
 `{username}` 자리에 본인의 solved.ac 핸들을 넣어서 사용하세요.
 
 ```markdown
-[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://github.com/kookjd7759/solvedac-readme-stats)
+[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://solved.ac/en/profile/{username})
 ```
 
 ## Card Versions
@@ -56,29 +64,35 @@ Replace `{username}` with your solved.ac handle.
 ### v1
 
 Classic card layout.  
+기본 클래식 카드 레이아웃입니다.
+
 If you omit the version parameter, `v=1` is used by default.  
+버전 파라미터를 생략하면 기본값으로 `v=1`이 적용됩니다.
 
 ```markdown
-[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://github.com/kookjd7759/solvedac-readme-stats)
+[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://solved.ac/en/profile/{username})
 ```
 
 Explicit `v=1` example.  
+`v=1`을 명시적으로 적는 예시입니다.
 
 ```markdown
-[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=1)](https://github.com/kookjd7759/solvedac-readme-stats)
+[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=1)](https://solved.ac/en/profile/{username})
 ```
 
 ### v2
 
 Minimal border layout with the solved background area applied to the top section.  
+상단 solved 배경 영역이 적용된 미니멀 보더 레이아웃입니다.
 
 ```markdown
-[![solved.ac stats v2](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2)](https://github.com/kookjd7759/solvedac-readme-stats)
+[![solved.ac stats v2](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2)](https://solved.ac/en/profile/{username})
 ```
 
 ## Example URLs
 
 Ready-to-test example URLs.  
+바로 테스트해볼 수 있는 예시 URL입니다.
 
 - `v=1`: `https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=1`
 - `v=2`: `https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2`
@@ -86,39 +100,63 @@ Ready-to-test example URLs.
 ## Query Parameters
 
 Available query parameters.  
+사용 가능한 쿼리 파라미터입니다.
 
 - `handle`: solved.ac handle  
+  `handle`: solved.ac 핸들
 - `v`: card version (`1` or `2`)  
+  `v`: 카드 버전 (`1` 또는 `2`)
 - `debug`: return JSON debug output with `1`, `true`, or `json`  
+  `debug`: `1`, `true`, `json`일 때 JSON 디버그 정보를 반환
+
+## GitHub Pages
+
+This repository includes a static GitHub Pages app in [`docs/`](./docs) and a deployment workflow in [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml).  
+이 저장소에는 [`docs/`](./docs)에 정적 GitHub Pages 앱이 포함되어 있고, [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml)로 배포할 수 있습니다.
+
+The Pages app uses the deployed Vercel API to render cards and convert them to PNG in the browser.  
+Pages 앱은 배포된 Vercel API를 사용해 카드를 렌더링하고, 브라우저에서 PNG로 변환합니다.
 
 ## Deploy Your Own
 
-Fork this repository and deploy it to Vercel.  
+Fork this repository and deploy the API to Vercel.  
+이 저장소를 Fork한 뒤 API를 Vercel에 배포할 수 있습니다.
 
 1. Fork this repository.  
-2. Deploy it to Vercel.  
-3. Use your own deployed `/api` endpoint in your README.  
+   이 저장소를 Fork합니다.
+2. Deploy the Next.js app to Vercel.  
+   Next.js 앱을 Vercel에 배포합니다.
+3. Enable GitHub Pages with GitHub Actions for the web studio.  
+   웹 스튜디오를 위해 GitHub Actions 기반 GitHub Pages를 활성화합니다.
+4. Use your own deployed `/api` endpoint if you want a separate API base.  
+   별도 API를 쓰고 싶다면 배포한 `/api` 엔드포인트를 사용합니다.
 
 ## Development
 
 Run the development server.  
+개발 서버를 실행합니다.
 
 ```bash
 npm run dev
 ```
 
 Then open [http://localhost:3000](http://localhost:3000).  
+그 다음 [http://localhost:3000](http://localhost:3000)을 열어 확인하세요.
 
 Example local test URLs.  
+로컬 테스트용 예시 URL입니다.
 
-- `http://localhost:3000/api?handle=kookjd7759`
+- `http://localhost:3000/`
+- `http://localhost:3000/api?handle=kookjd7759&v=1`
 - `http://localhost:3000/api?handle=kookjd7759&v=2`
 
 ## About solved.ac
 
 solved.ac is a competitive programming profile service built around Baekjoon Online Judge (BOJ).  
+solved.ac는 백준 온라인 저지(BOJ) 기반의 알고리즘 프로필 서비스입니다.
 
 This project uses solved.ac public profile data to generate dynamic README cards.  
+이 프로젝트는 solved.ac 공개 프로필 데이터를 사용해 동적 README 카드를 생성합니다.
 
 ## License
 
