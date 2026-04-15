@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>solvedac-readme-stats Web Studio</title>
+    <meta
+      name="description"
+      content="Preview solved.ac README cards on GitHub Pages and download them as PNG."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero-card">
+        <div class="hero-copy">
+          <p class="eyebrow">solved.ac README card studio</p>
+          <h1>Open on GitHub Pages, preview instantly, download as PNG.</h1>
+          <p class="hero-text">
+            Choose a card version, enter a solved.ac handle, and render the card directly in the browser.
+          </p>
+          <p class="hero-text hero-text-ko">
+            버전을 고르고 solved.ac 핸들을 입력하면 브라우저에서 바로 카드 미리보기를 확인하고 PNG로 저장할 수 있습니다.
+          </p>
+        </div>
+        <a
+          class="hero-link"
+          href="https://github.com/kookjd7759/solvedac-readme-stats"
+          target="_blank"
+          rel="noreferrer"
+        >
+          GitHub Repository
+        </a>
+      </section>
+
+      <section class="studio-grid">
+        <aside class="control-card">
+          <div class="section-head">
+            <div>
+              <h2>Card Controls</h2>
+              <p>버전 선택과 핸들 입력 후 OK를 누르세요.</p>
+            </div>
+            <span class="status-pill" id="status-pill">ready</span>
+          </div>
+
+          <div class="field-group">
+            <label for="handle-input">solved.ac handle</label>
+            <input
+              id="handle-input"
+              type="text"
+              value="kookjd7759"
+              placeholder="kookjd7759"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="field-group">
+            <span class="group-label">version</span>
+            <div class="version-grid">
+              <label class="version-card">
+                <input type="radio" name="version" value="1" />
+                <span class="version-title">v1</span>
+                <span class="version-note">Classic layout</span>
+              </label>
+              <label class="version-card version-card-active">
+                <input type="radio" name="version" value="2" checked />
+                <span class="version-title">v2</span>
+                <span class="version-note">Minimal layout</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button type="button" id="render-button" class="primary-button">OK</button>
+            <button type="button" id="download-button" class="secondary-button" disabled>
+              Download PNG
+            </button>
+          </div>
+
+          <div class="info-card">
+            <p class="info-label">api url</p>
+            <code id="api-url">https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2</code>
+          </div>
+
+          <div class="message-card" id="message-card">
+            Enter a handle and render a card.
+          </div>
+        </aside>
+
+        <section class="preview-card">
+          <div class="section-head">
+            <div>
+              <h2>Preview</h2>
+              <p>렌더링된 카드는 오른쪽에서 바로 확인할 수 있습니다.</p>
+            </div>
+            <a
+              id="open-svg-link"
+              class="preview-link"
+              href="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open SVG
+            </a>
+          </div>
+
+          <div class="preview-stage">
+            <div class="preview-empty" id="preview-empty">
+              <p class="preview-empty-title">No preview yet</p>
+              <p class="preview-empty-copy">OK를 누르면 카드 이미지가 여기에 표시됩니다.</p>
+            </div>
+            <img
+              id="preview-image"
+              class="preview-image"
+              alt="solved.ac card preview"
+              hidden
+            />
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
