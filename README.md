@@ -15,16 +15,26 @@
 
 <table>
   <tr>
-    <td align="center" width="50%">
+    <td align="center">
       <strong>v1</strong><br />
-      Classic layout<br />
+      Classic layout
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
       <a href="https://solved.ac/en/profile/kookjd7759">
         <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=1" alt="solved.ac stats v1" />
       </a>
     </td>
-    <td align="center" width="50%">
+  </tr>
+  <tr>
+    <td align="center">
       <strong>v2</strong><br />
-      Minimal layout<br /><br />
+      Minimal layout
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
       <a href="https://solved.ac/en/profile/kookjd7759">
         <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2" alt="solved.ac stats v2" />
       </a>
@@ -38,7 +48,7 @@ Replace `{username}` with your solved.ac handle.
 `{username}` 자리에 본인의 solved.ac 핸들을 넣어서 사용하세요.
 
 ```markdown
-[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://solved.ac/en/profile/{username})
+[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://github.com/kookjd7759/solvedac-readme-stats)
 ```
 
 ## Card Versions
@@ -49,13 +59,13 @@ Classic card layout.
 If you omit the version parameter, `v=1` is used by default.  
 
 ```markdown
-[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://solved.ac/en/profile/{username})
+[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://github.com/kookjd7759/solvedac-readme-stats)
 ```
 
 Explicit `v=1` example.  
 
 ```markdown
-[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=1)](https://solved.ac/en/profile/{username})
+[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=1)](https://github.com/kookjd7759/solvedac-readme-stats)
 ```
 
 ### v2
@@ -63,14 +73,14 @@ Explicit `v=1` example.
 Minimal border layout with the solved background area applied to the top section.  
 
 ```markdown
-[![solved.ac stats v2](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2)](https://solved.ac/en/profile/{username})
+[![solved.ac stats v2](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2)](https://github.com/kookjd7759/solvedac-readme-stats)
 ```
 
 ## Example URLs
 
 Ready-to-test example URLs.  
 
-- `v=1`: `https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759`
+- `v=1`: `https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=1`
 - `v=2`: `https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2`
 
 ## Query Parameters
