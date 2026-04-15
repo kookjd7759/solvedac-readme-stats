@@ -5,91 +5,123 @@ import { avatarCx, avatarCy, avatarR, avatarSize } from './constant/avatar';
 
 type RenderInput = {
     user: SolvedUser;
-
     tierDataUri: string;
     avatarDataUri: string;
     bgDataUri: string;
-
-    badgeDataUri: string; // 설정 뱃지 (있으면)
-    classDataUri?: string; // ✅ NEW: 클래스 아이콘(data uri) (없으면 ""/undefined)
-
+    badgeDataUri: string;
+    classDataUri?: string;
     accentColor?: string;
 };
 
+const font = 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto';
+
+function getTierAccentColor(tier: number) {
+    if (tier >= 31) return '#7C3AED';
+    if (tier >= 26) return '#FF0062';
+    if (tier >= 21) return '#00B4FC';
+    if (tier >= 16) return '#27E2A4';
+    if (tier >= 11) return '#EC9A00';
+    if (tier >= 6) return '#435F7A';
+    if (tier >= 1) return '#AD5600';
+    return '#94A3B8';
+}
+
+function renderTierIcon(dataUri: string, tier: number, x: number, y: number, size: number) {
+    const tierFallbackText = esc(String(tier));
+
+    if (dataUri) {
+        return `<image href="${dataUri}" x="${x}" y="${y}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid meet"/>`;
+    }
+
+    return `
+      <g>
+        <circle cx="${x + size / 2}" cy="${y + size / 2}" r="${size / 2}" fill="#E2E8F0"/>
+        <text x="${x + size / 2}" y="${y + size / 2 + 4}"
+              text-anchor="middle" fill="#334155" font-size="11" font-weight="900" font-family="${font}">
+          ${tierFallbackText}
+        </text>
+      </g>
+    `;
+}
+
+function renderAssetToken(href: string, x: number, y: number, size: number) {
+    return `
+      <g>
+        <circle cx="${x + size / 2}" cy="${y + size / 2}" r="${size / 2}" fill="#FFFFFF" fill-opacity="0.88"/>
+        <circle cx="${x + size / 2}" cy="${y + size / 2}" r="${size / 2 - 0.5}" fill="none" stroke="#E2E8F0"/>
+        <image href="${href}" x="${x + 5}" y="${y + 5}" width="${size - 10}" height="${size - 10}" preserveAspectRatio="xMidYMid meet"/>
+      </g>
+    `;
+}
+
+function renderPrimaryStat(
+    x: number,
+    y: number,
+    width: number,
+    label: string,
+    value: string,
+    helper: string
+) {
+    return `
+      <g>
+        <rect x="${x}" y="${y}" width="${width}" height="66" rx="18" fill="#F8FAFC"/>
+        <text x="${x + 18}" y="${y + 22}" fill="#64748B" font-size="11" font-weight="800" letter-spacing="0.12em" font-family="${font}">
+          ${esc(label)}
+        </text>
+        <text x="${x + 18}" y="${y + 47}" fill="#0F172A" font-size="24" font-weight="900" font-family="${font}">
+          ${esc(value)}
+        </text>
+        <text x="${x + 18}" y="${y + 61}" fill="#94A3B8" font-size="11.5" font-weight="700" font-family="${font}">
+          ${esc(helper)}
+        </text>
+      </g>
+    `;
+}
+
 export function renderCard(input: RenderInput) {
     const u = input.user;
-
     const handle = esc(u.handle || '');
     const solved = u.solvedCount ?? 0;
     const rank = (u as any).rank ?? 0;
-    const clazz = (u as any).class ?? 0;
-    const streak = u.maxStreak ?? 0;
-
     const hasAvatar = !!input.avatarDataUri;
     const hasBg = !!input.bgDataUri;
-
     const hasBadge = !!input.badgeDataUri;
-    const hasClassIcon = !!(
-        input.classDataUri && input.classDataUri.trim().length > 0
-    );
-
-    // Name line
+    const hasClassIcon = !!(input.classDataUri && input.classDataUri.trim().length > 0);
     const nameX = 18;
     const nameY = topH + 34;
-
-    // Tier icon next to name
     const tierSize = 24;
     const tierX = nameX;
     const tierY = topH + 18;
-
     const textX = nameX + tierSize + 8;
-
-    // ✅ NEW: name + badges
-    const tagH = 18;
-    const tagR = 9;
-
-    // 닉네임 오른쪽 시작 위치: 대충 텍스트 뒤로 충분히 떨어뜨리기
-    // (SVG에서 텍스트 실제 폭 측정이 어려워서, handle 길이에 따라 보정)
-    // 평균 폰트 18px에서 글자폭 ~ 9~10px 정도로 잡고 + 여유
-    const approxNameW = Math.min(280, 10 * handle.length + 8);
-    const tagsX = textX + approxNameW + 10;
-
-    const font = 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto';
-    const accent = input.accentColor || '#3ef0b1';
-
-    // Stats rows (2 lines)
     const rowsTop = topH + 58;
     const rowH = 28;
     const rowGap = 8;
     const leftPad = 18;
-    const rightPad = 18;
-    const rowW = W - leftPad - rightPad;
+    const rowW = W - leftPad * 2;
+    const accent = input.accentColor || getTierAccentColor(u.tier ?? 0);
+    const triX = Math.round(W * 0.29);
+    const kneeY = Math.round(topH * 1.0);
+    const kneeX = Math.round(W * 0.6);
+    const badgeSize = 50;
+    const badgeX = avatarCx + avatarR - badgeSize / 2 + 40;
+    const badgeY = avatarCy + avatarR - badgeSize / 2 - 20;
+    const classGap = 8;
+    const classX = badgeX + badgeSize + classGap;
+    const classY = badgeY;
 
     function row(label: string, value: string, y: number) {
-        const L = esc(label);
-        const V = esc(value);
         return `
       <g>
         <rect x="${leftPad}" y="${y}" width="${rowW}" height="${rowH}" rx="12" fill="#F8FAFC"/>
         <text x="${leftPad + 12}" y="${y + 19}" fill="#64748B" font-size="12" font-weight="700" font-family="${font}">
-          ${L}
+          ${esc(label)}
         </text>
         <text x="${leftPad + rowW - 12}" y="${y + 19}" text-anchor="end" fill="#0F172A" font-size="12.5" font-weight="900" font-family="${font}">
-          ${V}
+          ${esc(value)}
         </text>
       </g>
     `;
     }
-
-    // Diagonal bg
-    const triX = Math.round(W * 0.29);
-    const kneeY = Math.round(topH * 1.0);
-    const kneeX = Math.round(W * 0.6);
-
-    // ✅ badge overlay (bottom-right)
-    const badgeSize = 50; // 크기 (원하면 64~88 사이로 조절)
-    const badgeX = avatarCx + avatarR - badgeSize / 2 + 40; // 40 만큼 오른쪽 이동
-    const badgeY = avatarCy + avatarR - badgeSize / 2 - 20; // 20 만큼 위쪽 이동
 
     const badgeOverlay = hasBadge
         ? `
@@ -102,10 +134,6 @@ export function renderCard(input: RenderInput) {
       </g>
     `
         : '';
-    // ✅ class icon overlay (to the right of badge)
-    const classGap = 8;
-    const classX = badgeX + badgeSize + classGap;
-    const classY = badgeY;
 
     const classOverlay = hasClassIcon
         ? `
@@ -119,18 +147,7 @@ export function renderCard(input: RenderInput) {
     `
         : '';
 
-    const tierFallbackText = esc(String(u.tier ?? 0));
-    const tierIcon = input.tierDataUri
-        ? `<image href="${input.tierDataUri}" x="${tierX}" y="${tierY}" width="${tierSize}" height="${tierSize}"/>`
-        : `
-      <g>
-        <circle cx="${tierX + tierSize / 2}" cy="${tierY + tierSize / 2}" r="${tierSize / 2}" fill="#E2E8F0"/>
-        <text x="${tierX + tierSize / 2}" y="${tierY + tierSize / 2 + 4}"
-              text-anchor="middle" fill="#334155" font-size="11" font-weight="900" font-family="${font}">
-          ${tierFallbackText}
-        </text>
-      </g>
-    `;
+    const tierIcon = renderTierIcon(input.tierDataUri, u.tier ?? 0, tierX, tierY, tierSize);
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${W + PAD * 2}" height="${H + PAD * 2}"
@@ -164,8 +181,8 @@ export function renderCard(input: RenderInput) {
       x="${-(PAD + 70)}" y="${-(PAD + 70)}"
       width="${W + (PAD + 70) * 2}" height="${H + (PAD + 70) * 2}">
       <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#0F172A" flood-opacity="0.14"/>
-      <feDropShadow dx="0" dy="3"  stdDeviation="4"  flood-color="#0F172A" flood-opacity="0.08"/>
-      <feDropShadow dx="0" dy="1"  stdDeviation="1" flood-color="#0F172A" flood-opacity="0.10"/>
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0F172A" flood-opacity="0.08"/>
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#0F172A" flood-opacity="0.10"/>
     </filter>
 
     <filter id="avatarShadow" x="-25%" y="-25%" width="160%" height="160%">
@@ -177,102 +194,213 @@ export function renderCard(input: RenderInput) {
       <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0.18"/>
       <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
     </radialGradient>
-
   </defs>
 
   <g filter="url(#shadow)">
     <g clip-path="url(#clipCard)">
       <rect x="0" y="0" width="${W}" height="${H}" rx="${R}" fill="url(#base)"/>
-
       <polygon points="0,0 ${triX},0 ${kneeX},${kneeY} 0,${kneeY}" fill="#FFFFFF"/>
 
       <g clip-path="url(#clipBgTri)">
         <rect x="${triX}" y="0" width="${W - triX}" height="${kneeY}" fill="url(#triFallback)"/>
-        ${
-            hasBg
-                ? `<image href="${input.bgDataUri}" x="${triX}" y="0" width="${W - triX}" height="${kneeY}"
-                    preserveAspectRatio="xMidYMid slice"/>`
-                : ''
-        }
+        ${hasBg
+            ? `<image href="${input.bgDataUri}" x="${triX}" y="0" width="${W - triX}" height="${kneeY}" preserveAspectRatio="xMidYMid slice"/>`
+            : ''}
         <rect x="${triX}" y="0" width="${W - triX}" height="${kneeY}" fill="#0F172A" opacity="0.06"/>
       </g>
 
       <line x1="${triX}" y1="0" x2="${kneeX}" y2="${kneeY}" stroke="#E2E8F0" stroke-width="2" opacity="0.9"/>
       <line x1="${kneeX}" y1="${kneeY}" x2="${W}" y2="${kneeY}" stroke="#E2E8F0" stroke-width="2" opacity="0.9"/>
-
       <line x1="18" y1="${topH}" x2="${W - 18}" y2="${topH}" stroke="#EEF2F7"/>
 
-      <!-- ✅ card border (inside clip) -->
-      <rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="${R - 0.5}"
-            fill="none" stroke="#E5E7EB" stroke-opacity="0.65"/>
+      <rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="${R - 0.5}" fill="none" stroke="#E5E7EB" stroke-opacity="0.65"/>
 
-      <!-- ✅ subtle inner highlight (top-left shine) -->
-      <path d="M ${R} 1 H ${W - R} 
+      <path d="M ${R} 1 H ${W - R}
               C ${W - R / 2} 1 ${W - 1} ${R / 2} ${W - 1} ${R}
-              V ${Math.round(topH * 0.55)} 
+              V ${Math.round(topH * 0.55)}
               C ${Math.round(W * 0.66)} ${Math.round(topH * 0.38)} ${Math.round(W * 0.4)} ${Math.round(topH * 0.28)} ${R} ${Math.round(topH * 0.22)}
               Z"
             fill="url(#shine)"/>
     </g>
   </g>
 
-  <!-- Avatar -->
   <g filter="url(#avatarShadow)">
     <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarR + 3}" fill="#FFFFFF"/>
     <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarR + 2}" fill="none" stroke="#E5E7EB"/>
-    ${
-        hasAvatar
-            ? `<image href="${input.avatarDataUri}" x="${avatarCx - avatarR}" y="${avatarCy - avatarR}"
-                 width="${avatarSize}" height="${avatarSize}" clip-path="url(#clipAvatar)"
-                 preserveAspectRatio="xMidYMid slice"/>`
-            : `<text x="${avatarCx}" y="${avatarCy + 6}" text-anchor="middle"
-                 fill="#94A3B8" font-size="18" font-weight="900" font-family="${font}">?</text>`
-    }
+    ${hasAvatar
+        ? `<image href="${input.avatarDataUri}" x="${avatarCx - avatarR}" y="${avatarCy - avatarR}" width="${avatarSize}" height="${avatarSize}" clip-path="url(#clipAvatar)" preserveAspectRatio="xMidYMid slice"/>`
+        : `<text x="${avatarCx}" y="${avatarCy + 6}" text-anchor="middle" fill="#94A3B8" font-size="18" font-weight="900" font-family="${font}">?</text>`}
   </g>
 
-  <!-- ✅ Badge bottom-right overlay -->
   ${badgeOverlay}
   ${classOverlay}
-  
-  <!-- Tier + Handle -->
   ${tierIcon}
+
   <text x="${textX}" y="${nameY}" fill="#0F172A" font-size="18" font-weight="900" font-family="${font}">
     ${handle}
   </text>
 
-  <!-- Rows -->
   ${row('Solved', `${solved}`, rowsTop)}
-  ${row('Rank', rank ? `#${rank}` : '-', rowsTop + (rowH + rowGap) * 1)}
+  ${row('Rank', rank ? `#${rank}` : '-', rowsTop + rowH + rowGap)}
+</svg>`;
+}
 
+export function renderCardV2(input: RenderInput) {
+    const u = input.user;
+    const handle = esc(u.handle || '');
+    const solved = u.solvedCount ?? 0;
+    const rank = (u as any).rank ?? 0;
+    const clazz = (u as any).class ?? 0;
+    const streak = u.maxStreak ?? 0;
+    const tier = u.tier ?? 0;
+    const accent = input.accentColor || getTierAccentColor(tier);
+    const hasAvatar = !!input.avatarDataUri;
+    const hasBg = !!input.bgDataUri;
+    const hasBadge = !!input.badgeDataUri;
+    const hasClassIcon = !!(input.classDataUri && input.classDataUri.trim().length > 0);
+    const cardH = 244;
+    const heroH = 96;
+    const triX = Math.round(W * 0.3);
+    const kneeX = Math.round(W * 0.62);
+    const kneeY = heroH;
+    const tierSize = 24;
+    const tierX = 18;
+    const tierY = heroH + 16;
+    const nameX = tierX + tierSize + 10;
+    const nameY = heroH + 34;
+    const handleFontSize = handle.length > 18 ? 19 : handle.length > 14 ? 21 : 23;
+    const avatarOuterR = avatarR + 4;
+    const rowH = 28;
+    const rowGap = 8;
+    const rowX = 18;
+    const rowW = W - rowX * 2;
+    const rowsTop = 160;
+    const badgeSize = 50;
+    const badgeX = avatarCx + avatarR - badgeSize / 2 + 40;
+    const badgeY = avatarCy + avatarR - badgeSize / 2 - 20;
+    const classGap = 8;
+    const classX = badgeX + badgeSize + classGap;
+    const classY = badgeY;
+    const badgeOverlay = hasBadge
+        ? `<image href="${input.badgeDataUri}" x="${badgeX}" y="${badgeY}" width="${badgeSize}" height="${badgeSize}" preserveAspectRatio="xMidYMid meet"/>`
+        : '';
+    const classOverlay = hasClassIcon
+        ? `<image href="${input.classDataUri}" x="${classX}" y="${classY}" width="${badgeSize}" height="${badgeSize}" preserveAspectRatio="xMidYMid meet"/>`
+        : '';
+
+    function row(label: string, value: string, y: number) {
+        return `
+      <g>
+        <rect x="${rowX}" y="${y}" width="${rowW}" height="${rowH}" rx="14" fill="#F8FAFC"/>
+        <text x="${rowX + 14}" y="${y + 19}" fill="#64748B" font-size="12" font-weight="800" font-family="${font}">
+          ${esc(label)}
+        </text>
+        <text x="${rowX + rowW - 14}" y="${y + 19}" text-anchor="end" fill="#0F172A" font-size="13" font-weight="900" font-family="${font}">
+          ${esc(value)}
+        </text>
+      </g>
+    `;
+    }
+
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${W}" height="${cardH}" viewBox="0 0 ${W} ${cardH}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="clipCardV2">
+      <rect x="0" y="0" width="${W}" height="${cardH}" rx="${R}"/>
+    </clipPath>
+    <clipPath id="clipAvatarV2">
+      <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarR}"/>
+    </clipPath>
+    <clipPath id="clipHeroV2">
+      <polygon points="${triX},0 ${W},0 ${W},${kneeY} ${kneeX},${kneeY}"/>
+    </clipPath>
+    <linearGradient id="heroFallbackV2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${accent}" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#60A5FA" stop-opacity="0.16"/>
+    </linearGradient>
+    <linearGradient id="accentRailV2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="${accent}"/>
+      <stop offset="100%" stop-color="#60A5FA"/>
+    </linearGradient>
+    <linearGradient id="avatarRingV2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F1F5F9"/>
+    </linearGradient>
+  </defs>
+
+  <g clip-path="url(#clipCardV2)">
+    <rect x="0" y="0" width="${W}" height="${cardH}" rx="${R}" fill="#FFFFFF"/>
+    <rect x="0.5" y="0.5" width="${W - 1}" height="${cardH - 1}" rx="${R - 0.5}" fill="none" stroke="#D9E2EC"/>
+
+    <polygon points="0,0 ${triX},0 ${kneeX},${kneeY} 0,${kneeY}" fill="#FFFFFF"/>
+    <g clip-path="url(#clipHeroV2)">
+      <rect x="${triX}" y="0" width="${W - triX}" height="${heroH}" fill="url(#heroFallbackV2)"/>
+      ${hasBg
+        ? `<image href="${input.bgDataUri}" x="${triX}" y="0" width="${W - triX}" height="${heroH}" preserveAspectRatio="xMidYMid slice" opacity="0.4"/>`
+        : ''}
+      <rect x="${triX}" y="0" width="${W - triX}" height="${heroH}" fill="#FFFFFF" opacity="0.16"/>
+    </g>
+
+    <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarOuterR + 2}" fill="url(#avatarRingV2)"/>
+    <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarOuterR + 1}" fill="none" stroke="#DCE4EE"/>
+    <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarR + 1}" fill="none" stroke="${accent}" stroke-opacity="0.22"/>
+    ${hasAvatar
+        ? `<image href="${input.avatarDataUri}" x="${avatarCx - avatarR}" y="${avatarCy - avatarR}" width="${avatarSize}" height="${avatarSize}" clip-path="url(#clipAvatarV2)" preserveAspectRatio="xMidYMid slice"/>`
+        : `<text x="${avatarCx}" y="${avatarCy + 6}" text-anchor="middle" fill="#94A3B8" font-size="18" font-weight="900" font-family="${font}">?</text>`}
+
+    ${badgeOverlay}
+    ${classOverlay}
+    ${renderTierIcon(input.tierDataUri, tier, tierX, tierY, tierSize)}
+    <text x="${nameX}" y="${nameY}" fill="#0F172A" font-size="${handleFontSize}" font-weight="900" font-family="${font}">
+      ${handle}
+    </text>
+
+    ${row('Solved', `${solved}`, rowsTop)}
+    ${row('Rank', rank ? `#${rank}` : '-', rowsTop + rowH + rowGap)}
+  </g>
 </svg>`;
 }
 
 export function renderErrorCard(msg: string) {
     const safe = esc(msg);
-    const W = 560;
-    const H = 140;
-    const R = 18;
-    const PAD = 33; // 바깥 패딩
-    const font = 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto';
+    const errorW = 560;
+    const errorH = 140;
+    const errorR = 18;
 
     return `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="${W + PAD * 2}" height="${H + PAD * 2}"
-     viewBox="0 0 ${W + PAD * 2} ${H + PAD * 2}"
+<svg width="${errorW + PAD * 2}" height="${errorH + PAD * 2}"
+     viewBox="0 0 ${errorW + PAD * 2} ${errorH + PAD * 2}"
      xmlns="http://www.w3.org/2000/svg">
   <defs>
     <filter id="shadow"
       filterUnits="userSpaceOnUse"
       x="${-(PAD + 70)}" y="${-(PAD + 70)}"
-      width="${W + (PAD + 70) * 2}" height="${H + (PAD + 70) * 2}">
+      width="${errorW + (PAD + 70) * 2}" height="${errorH + (PAD + 70) * 2}">
       <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#0F172A" flood-opacity="0.14"/>
-      <feDropShadow dx="0" dy="4"  stdDeviation="6"  flood-color="#0F172A" flood-opacity="0.08"/>
-      <feDropShadow dx="0" dy="1"  stdDeviation="1.5" flood-color="#0F172A" flood-opacity="0.10"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.08"/>
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#0F172A" flood-opacity="0.10"/>
     </filter>
   </defs>
   <g filter="url(#shadow)">
-    <rect width="${W}" height="${H}" rx="${R}" fill="#FFFFFF"/>
+    <rect width="${errorW}" height="${errorH}" rx="${errorR}" fill="#FFFFFF"/>
   </g>
   <text x="22" y="54" fill="#DC2626" font-size="16" font-weight="900" font-family="${font}">Error</text>
   <text x="22" y="80" fill="#0F172A" font-size="12.5" font-weight="700" font-family="${font}">${safe}</text>
+</svg>`;
+}
+
+export function renderErrorCardV2(msg: string) {
+    const safe = esc(msg);
+    const errorW = 560;
+    const errorH = 140;
+    const errorR = 18;
+
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${errorW}" height="${errorH}" viewBox="0 0 ${errorW} ${errorH}" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="${errorW}" height="${errorH}" rx="${errorR}" fill="#FFFFFF"/>
+  <rect x="0.5" y="0.5" width="${errorW - 1}" height="${errorH - 1}" rx="${errorR - 0.5}" fill="none" stroke="#D9E2EC"/>
+  <text x="24" y="48" fill="#DC2626" font-size="12" font-weight="800" letter-spacing="0.16em" font-family="${font}">ERROR</text>
+  <text x="24" y="78" fill="#0F172A" font-size="18" font-weight="900" font-family="${font}">Unable to render card</text>
+  <text x="24" y="104" fill="#475569" font-size="12.5" font-weight="700" font-family="${font}">${safe}</text>
 </svg>`;
 }
