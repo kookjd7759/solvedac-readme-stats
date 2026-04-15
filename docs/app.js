@@ -98,6 +98,15 @@ function buildApiUrl(options = {}) {
   return url.toString();
 }
 
+function buildDownloadFilename() {
+  const safeHandle = (state.handle || "card")
+    .trim()
+    .replace(/[^a-z0-9_-]+/gi, "-")
+    .replace(/^-+|-+$/g, "") || "card";
+
+  return `solvedac-${safeHandle}-v${state.version}.png`;
+}
+
 function syncApiUrl() {
   const apiUrl = buildApiUrl();
   elements.apiUrl.textContent = apiUrl;
@@ -138,7 +147,7 @@ function hidePreview() {
   elements.previewEmpty.hidden = false;
 }
 
-function downloadPng() {
+async function downloadPng() {
   if (!state.handle) {
     setStatus("error");
     setMessage(
@@ -154,18 +163,49 @@ function downloadPng() {
     cacheBust: true,
   });
 
-  const link = document.createElement("a");
-  link.href = pngUrl;
-  link.rel = "noreferrer";
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+  try {
+    setStatus("loading");
+    setMessage(
+      "Preparing PNG download... / PNG 다운로드를 준비하는 중입니다.",
+      false
+    );
 
-  setStatus("ready");
-  setMessage(
-    "PNG download requested. If nothing downloads yet, redeploy Vercel so the API can serve format=png. / PNG 다운로드를 요청했습니다. 아직 내려오지 않으면 Vercel을 다시 배포해 format=png를 반영해 주세요.",
-    false
-  );
+    const response = await fetch(pngUrl, {
+      mode: "cors",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("The PNG API did not return a successful response.");
+    }
+
+    const pngBlob = await response.blob();
+    const downloadUrl = URL.createObjectURL(pngBlob);
+
+    try {
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = buildDownloadFilename();
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } finally {
+      URL.revokeObjectURL(downloadUrl);
+    }
+
+    setStatus("ready");
+    setMessage(
+      "PNG download started. It should download directly instead of opening a new tab. / PNG 다운로드가 시작되었습니다. 이제 새 탭 대신 바로 다운로드됩니다.",
+      false
+    );
+  } catch (error) {
+    setStatus("error");
+    setMessage(
+      (error instanceof Error ? error.message : "PNG download failed.") +
+        " / PNG 다운로드에 실패했습니다. Vercel에 최신 API 배포가 반영되어야 정상 다운로드됩니다.",
+      true
+    );
+  }
 }
 
 function setStatus(status) {
