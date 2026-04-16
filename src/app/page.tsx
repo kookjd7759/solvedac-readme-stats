@@ -209,7 +209,7 @@ export default function Home() {
                   onChange={(event) => setDraftShowStreak(event.target.checked)}
                   className="h-4 w-4 rounded border-slate-300 text-sky-500 focus:ring-sky-200"
                 />
-                <span>Include Max Streak + yearly grass</span>
+                <span>Streak</span>
               </label>
 
               <div className="grid gap-3 sm:grid-cols-2">

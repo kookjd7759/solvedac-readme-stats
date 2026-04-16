@@ -48,13 +48,19 @@ Enable `streak=true` in the studio if you want the `Max Streak` row and the rece
 <table>
   <tr>
     <td align="center" width="50%">
-      <strong>v=1, streak=false</strong><br />
+      <strong>v=1, streak=false</strong>
+    </td>
+    <td align="center" width="50%">
+      <strong>v=1, streak=true</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
       <a href="https://solved.ac/en/profile/kookjd7759">
         <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=1&streak=false" alt="solved.ac stats v1 without streak" />
       </a>
     </td>
     <td align="center" width="50%">
-      <strong>v=1, streak=true</strong><br />
       <a href="https://solved.ac/en/profile/kookjd7759">
         <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=1&streak=true" alt="solved.ac stats v1 with streak" />
       </a>
@@ -62,13 +68,19 @@ Enable `streak=true` in the studio if you want the `Max Streak` row and the rece
   </tr>
   <tr>
     <td align="center" width="50%">
-      <strong>v=2, streak=false</strong><br />
+      <strong>v=2, streak=false</strong>
+    </td>
+    <td align="center" width="50%">
+      <strong>v=2, streak=true</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
       <a href="https://solved.ac/en/profile/kookjd7759">
         <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2&streak=false" alt="solved.ac stats v2 without streak" />
       </a>
     </td>
     <td align="center" width="50%">
-      <strong>v=2, streak=true</strong><br />
       <a href="https://solved.ac/en/profile/kookjd7759">
         <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2&streak=true" alt="solved.ac stats v2 with streak" />
       </a>
