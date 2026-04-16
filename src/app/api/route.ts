@@ -499,8 +499,8 @@ async function resolveBadgeImageUrlFromBadgePage(
     `https://solved.ac/en/badges/${encodeURIComponent(badgeId)}`,
   ];
 
-  const { html, pageUrl, attempts } = await fetchHtmlFromCandidates(pageUrls);
   try {
+    const { html, pageUrl, attempts } = await fetchHtmlFromCandidates(pageUrls);
     const urls = extractBadgeAssetUrls(html, badgeId);
 
     if (urls.length === 0) {
