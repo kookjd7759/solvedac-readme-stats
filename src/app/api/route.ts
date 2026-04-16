@@ -1,6 +1,6 @@
-export const runtime = "edge";
+export const runtime = "nodejs";
 
-import { fetchSolvedStreakSummary, fetchSolvedUser, fetchSolvedYearlyActivity } from "../../lib/solvedac";
+import { fetchSolvedUser, fetchSolvedYearlyActivity } from "../../lib/solvedac";
 import * as basic from "../../lib/render";
 
 const CORS_HEADERS: Record<string, string> = {
@@ -547,22 +547,17 @@ export async function GET(req: Request) {
     let streakSummary = null;
     let streakActivity = null;
     if (showStreakGrass) {
-      const [summaryResult, activityResult] = await Promise.allSettled([
-        fetchSolvedStreakSummary(handle),
+      streakSummary = {
+        currentStreak: 0,
+        longestStreak: u.maxStreak ?? 0,
+      };
+
+      const activityResult = await Promise.allSettled([
         fetchSolvedYearlyActivity(handle),
       ]);
 
-      if (summaryResult.status === "fulfilled") {
-        streakSummary = summaryResult.value;
-      } else {
-        streakSummary = {
-          currentStreak: 0,
-          longestStreak: u.maxStreak ?? 0,
-        };
-      }
-
-      if (activityResult.status === "fulfilled") {
-        streakActivity = activityResult.value;
+      if (activityResult[0]?.status === "fulfilled") {
+        streakActivity = activityResult[0].value;
       } else {
         streakActivity = {
           dailyCounts: {},
