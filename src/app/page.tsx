@@ -64,12 +64,11 @@ export default function Home() {
   const previewUrl = useMemo(
     () =>
       buildApiUrl(submittedHandle, submittedVersion, {
+        cacheKey: renderToken || undefined,
         streak: submittedShowStreak,
       }),
-    [submittedHandle, submittedVersion, submittedShowStreak]
+    [submittedHandle, submittedVersion, renderToken, submittedShowStreak]
   );
-
-  const previewImageKey = `${previewUrl}|${renderToken}`;
 
   function handleSubmit() {
     const nextHandle = draftHandle.trim();
@@ -99,6 +98,7 @@ export default function Home() {
 
     const downloadUrl = buildApiUrl(submittedHandle, submittedVersion, {
       download: true,
+      cacheKey: Date.now().toString(),
       streak: submittedShowStreak,
     });
 
@@ -273,7 +273,7 @@ export default function Home() {
               <div className="flex min-h-[360px] items-center justify-center rounded-[24px] border border-dashed border-slate-200 bg-white/90 p-3 sm:p-6">
                 {previewUrl ? (
                   <img
-                    key={previewImageKey}
+                    key={previewUrl}
                     src={previewUrl}
                     alt={`solved.ac card preview for ${submittedHandle}`}
                     onLoad={() => {

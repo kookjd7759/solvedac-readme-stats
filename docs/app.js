@@ -154,6 +154,7 @@ function renderCard() {
   state.submittedVersion = state.draftVersion;
   state.submittedShowStreak = state.draftShowStreak;
   state.previewUrl = buildApiUrl(nextHandle, state.draftVersion, {
+    cacheBust: true,
     streak: state.draftShowStreak,
   });
 
@@ -171,7 +172,6 @@ function renderCard() {
 function showPreview(previewUrl) {
   elements.previewImage.hidden = false;
   elements.previewEmpty.hidden = true;
-  elements.previewImage.removeAttribute("src");
   elements.previewImage.src = previewUrl;
 }
 
@@ -193,6 +193,7 @@ function downloadSvg() {
 
   const downloadUrl = buildApiUrl(state.submittedHandle, state.submittedVersion, {
     download: true,
+    cacheBust: true,
     streak: state.submittedShowStreak,
   });
 
