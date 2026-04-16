@@ -58,7 +58,7 @@ Enable `streak=true` in the studio if you want the `Max Streak` row and the rece
     </td>
     <td align="center" width="50%">
       <a href="https://solved.ac/en/profile/kookjd7759">
-        <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=1&streak=true" alt="solved.ac stats v1 with streak" />
+        <img src="https://github.com/kookjd7759/solvedac-readme-stats/blob/main/svg/solvedac-kookjd7759-v1_streak.svg" alt="solved.ac stats v1 with streak" />
       </a>
     </td>
   </tr>
@@ -78,7 +78,7 @@ Enable `streak=true` in the studio if you want the `Max Streak` row and the rece
     </td>
     <td align="center" width="50%">
       <a href="https://solved.ac/en/profile/kookjd7759">
-        <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2&streak=true" alt="solved.ac stats v2 with streak" />
+        <img src="https://github.com/kookjd7759/solvedac-readme-stats/blob/main/svg/solvedac-kookjd7759-v2_streak.svg" alt="solved.ac stats v2 with streak" />
       </a>
     </td>
   </tr>
