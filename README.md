@@ -14,11 +14,9 @@
 ## A Small Keepsake
 
 This project started as a README stats card generator, and now also works as a small keepsake card maker.
-
-원래는 README stats 용도로 만들던 프로젝트였고, 지금은 기록을 남기는 작은 카드 메이커로도 쓸 수 있게 정리했습니다.
-
 If you want, you can turn on `streak=true` to add a `Max Streak` row and a compact recent 1-year grass section below it.
 
+원래는 README stats 용도로 만들던 프로젝트였고, 지금은 기록을 남기는 작은 카드 메이커로도 쓸 수 있게 정리했습니다.
 필요하면 `streak=true` 옵션으로 `Max Streak` 행과 최근 1년 잔디 섹션도 함께 넣을 수 있습니다.
 
 ## Web Studio
@@ -31,12 +29,10 @@ If you want, you can turn on `streak=true` to add a `Max Streak` row and a compa
 
 Open the web studio here: [https://kookjd7759.github.io/solvedac-readme-stats/](https://kookjd7759.github.io/solvedac-readme-stats/)
 
-Choose `v1` or `v2`, enter any solved.ac handle, preview the rendered card in the browser, and download the exact SVG.
-
-`v1`, `v2` 중 하나를 고르고 solved.ac handle을 입력하면 브라우저에서 바로 미리보기를 확인하고 SVG를 그대로 내려받을 수 있습니다.
-
+Choose `v1` or `v2`, enter any solved.ac handle, preview the rendered card in the browser, and download the exact SVG.  
 Enable `streak=true` in the studio if you want the `Max Streak` row and the recent 1-year grass panel.
 
+`v1`, `v2` 중 하나를 고르고 solved.ac handle을 입력하면 브라우저에서 바로 미리보기를 확인하고 SVG를 그대로 내려받을 수 있습니다.  
 웹 스튜디오에서 `streak=true`를 켜면 `Max Streak` 행과 최근 1년 잔디 패널이 추가됩니다.
 
 ## Preview
