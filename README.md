@@ -41,6 +41,10 @@ Enable `streak=true` in the studio if you want the `Max Streak` row and the rece
 
 ## Preview
 
+`streak=true` adds a `Max Streak` row and a compact recent 1-year grass section.
+
+`streak=true`를 쓰면 `Max Streak` 행과 최근 1년 잔디 섹션이 추가됩니다.
+
 <table>
   <tr>
     <td align="center">
@@ -65,6 +69,19 @@ Enable `streak=true` in the studio if you want the `Max Streak` row and the rece
     <td align="center">
       <a href="https://solved.ac/en/profile/kookjd7759">
         <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2" alt="solved.ac stats v2" />
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <strong>v2 + streak=true</strong><br />
+      Minimal layout with Max Streak and recent 1-year grass
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="https://solved.ac/en/profile/kookjd7759">
+        <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2&streak=true" alt="solved.ac stats v2 with streak" />
       </a>
     </td>
   </tr>
@@ -108,6 +125,12 @@ If you add `streak=true`, the card also renders a `Max Streak` row and a compact
 [![solved.ac stats v2](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2)](https://github.com/kookjd7759/solvedac-readme-stats)
 ```
 
+Streak-enabled example:
+
+```markdown
+[![solved.ac stats v2 streak](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2&streak=true)](https://github.com/kookjd7759/solvedac-readme-stats)
+```
+
 ## Example URLs
 
 Ready-to-test example URLs.
@@ -115,6 +138,9 @@ Ready-to-test example URLs.
 - `v=1`: `https://solvedac-readme-stats.vercel.app/api?handle={username}&v=1`
 - `v=2`: `https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2`
 - `v=2 + streak=true`: `https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2&streak=true`
+  This adds the `Max Streak` row and recent 1-year grass section.
+- `v=2 + streak=false`: `https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2&streak=false`
+  This keeps the basic card without the streak section.
 
 ## Query Parameters
 
