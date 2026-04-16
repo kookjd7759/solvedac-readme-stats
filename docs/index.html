@@ -20,8 +20,7 @@
             Choose a card version, enter any solved.ac handle, and render the card directly in the browser.
           </p>
           <p class="hero-text hero-text-ko">
-            카드 버전을 고르고 solved.ac handle을 입력하면 브라우저에서 바로 미리보기를 확인하고,
-            화면에 보이는 그대로 SVG 파일로 저장할 수 있습니다.
+            `streak=true` can add a `Max Streak` row and a compact recent 1-year grass section below it.
           </p>
         </div>
         <a
@@ -39,7 +38,7 @@
           <div class="section-head">
             <div>
               <h2>Card Controls</h2>
-              <p>버전을 선택하고 handle을 입력한 뒤 OK를 누르세요.</p>
+              <p>Pick a version, enter a handle, then press OK.</p>
             </div>
             <span class="status-pill" id="status-pill">idle</span>
           </div>
@@ -73,7 +72,7 @@
 
           <label class="toggle-card" for="streak-input">
             <input id="streak-input" type="checkbox" />
-            <span>Include yearly streak grass</span>
+            <span>Include Max Streak + yearly grass</span>
           </label>
 
           <div class="button-row">
@@ -97,7 +96,7 @@
           <div class="section-head">
             <div>
               <h2>Preview</h2>
-              <p>렌더링된 카드는 오른쪽에서 바로 확인할 수 있습니다.</p>
+              <p>The rendered card appears on the right.</p>
             </div>
             <a
               id="open-svg-link"
@@ -113,7 +112,7 @@
             <div class="preview-empty" id="preview-empty">
               <p class="preview-empty-title">No preview yet</p>
               <p class="preview-empty-copy">
-                handle을 입력하고 OK를 누르면 카드가 여기 표시됩니다.
+                Enter a handle and press OK to render the card.
               </p>
             </div>
             <img

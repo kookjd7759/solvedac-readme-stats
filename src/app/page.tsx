@@ -76,13 +76,13 @@ export default function Home() {
       setSubmittedHandle('');
       setImageLoaded(false);
       setStatusTone('error');
-      setStatusMessage('Please enter a solved.ac handle. / solved.ac handle을 입력해 주세요.');
+      setStatusMessage('Please enter a solved.ac handle.');
       return;
     }
 
     setImageLoaded(false);
     setStatusTone('neutral');
-    setStatusMessage('Preview is loading... / 미리보기를 불러오는 중입니다.');
+    setStatusMessage('Preview is loading...');
     setSubmittedHandle(nextHandle);
     setSubmittedVersion(draftVersion);
     setSubmittedShowStreak(draftShowStreak);
@@ -92,7 +92,7 @@ export default function Home() {
   function handleDownloadSvg() {
     if (!submittedHandle) {
       setStatusTone('error');
-      setStatusMessage('Render a card before downloading. / 다운로드 전에 먼저 카드를 렌더링해 주세요.');
+      setStatusMessage('Render a card before downloading.');
       return;
     }
 
@@ -110,7 +110,7 @@ export default function Home() {
     link.remove();
 
     setStatusTone('neutral');
-    setStatusMessage('SVG download started. / SVG 다운로드가 시작되었습니다.');
+    setStatusMessage('SVG download started.');
   }
 
   const canSubmit = draftHandle.trim().length > 0;
@@ -133,7 +133,7 @@ export default function Home() {
                 Choose version 1 or 2, enter any solved.ac handle, and render the card directly in the browser.
               </p>
               <p className="max-w-2xl text-sm font-medium leading-7 text-slate-500 sm:text-base">
-                solved.ac handle만 입력하면 카드 미리보기를 바로 확인하고, 화면에 보이는 그대로 SVG 파일로 저장할 수 있습니다.
+                Turn on `streak=true` to add a `Max Streak` row and a compact recent 1-year grass section below it.
               </p>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function Home() {
                   Card Controls
                 </h2>
                 <p className="mt-1 text-sm font-medium text-slate-500">
-                  버전과 handle을 선택한 뒤 오른쪽에서 결과를 확인하세요.
+                  Pick a version, enter a handle, then press OK.
                 </p>
               </div>
               <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
@@ -209,7 +209,7 @@ export default function Home() {
                   onChange={(event) => setDraftShowStreak(event.target.checked)}
                   className="h-4 w-4 rounded border-slate-300 text-sky-500 focus:ring-sky-200"
                 />
-                <span>Include yearly streak grass</span>
+                <span>Include Max Streak + yearly grass</span>
               </label>
 
               <div className="grid gap-3 sm:grid-cols-2">
@@ -259,12 +259,12 @@ export default function Home() {
                   Preview
                 </h2>
                 <p className="mt-1 text-sm font-medium text-slate-500">
-                  렌더링된 카드는 오른쪽에서 바로 확인할 수 있습니다.
+                  The rendered card appears on the right.
                 </p>
               </div>
               <div className="inline-flex w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
                 {submittedHandle
-                  ? `${submittedHandle} / v${submittedVersion}${submittedShowStreak ? ' / streak' : ''}`
+                  ? `${submittedHandle} / v${submittedVersion}${submittedShowStreak ? ' / max streak' : ''}`
                   : 'ready'}
               </div>
             </div>
@@ -280,15 +280,13 @@ export default function Home() {
                       setImageLoaded(true);
                       setStatusTone('neutral');
                       setStatusMessage(
-                        'Preview updated. Download SVG saves the exact card you see on screen. / 미리보기가 갱신되었습니다. Download SVG는 지금 화면에 보이는 카드를 그대로 저장합니다.'
+                        'Preview updated. Download SVG saves the exact card you see on screen.'
                       );
                     }}
                     onError={() => {
                       setImageLoaded(false);
                       setStatusTone('error');
-                      setStatusMessage(
-                        'Failed to load the preview image. / 미리보기 이미지를 불러오지 못했습니다.'
-                      );
+                      setStatusMessage('Failed to load the preview image.');
                     }}
                     className="h-auto w-full max-w-[760px] rounded-[22px]"
                   />
@@ -296,7 +294,7 @@ export default function Home() {
                   <div className="text-center text-slate-500">
                     <p className="text-2xl font-black text-slate-700">No preview yet</p>
                     <p className="mt-3 text-sm font-medium">
-                      handle을 입력하고 OK를 누르면 카드가 여기 표시됩니다.
+                      Enter a handle and press OK to render the card.
                     </p>
                   </div>
                 )}
