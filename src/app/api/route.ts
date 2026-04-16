@@ -422,8 +422,64 @@ async function resolveBackgroundImageUrl(
 
 const BADGE_URL_CACHE = new Map<string, string>();
 
-async function resolveBadgeImageUrlFromBadgePage(
+function extractBadgeAssetUrls(text: string, badgeId: string) {
+  const id = escRe(badgeId);
+
+  let urls = collectMatchedAssetUrls(
+    text,
+    new RegExp(
+      String.raw`(?:(?:https?:)?\/\/[^"' <>\n]+)?\/profile_badge(?:\/profile)?(?:\/\d{2,4}x\d{2,4})?\/${id}[^"' <>\n]*\.(?:avif|png|svg|webp)(?:\?[^"' <>\n]*)?`,
+      "ig"
+    )
+  );
+
+  if (urls.length === 0) {
+    urls = collectMatchedAssetUrls(
+      text,
+      /(?:(?:https?:)?\/\/[^"' <>\n]+)?\/profile_badge(?:\/profile)?(?:\/\d{2,4}x\d{2,4})?\/[^"' <>\n]*\.(?:avif|png|svg|webp)(?:\?[^"' <>\n]*)?/ig
+    );
+  }
+
+  return urls;
+}
+
+async function resolveBadgeImageUrlFromProfileMarkdown(
+  handle: string,
   badgeId: string
+): Promise<ResolvedAssetPage> {
+  const pageUrls = [
+    `${SOLVED_PROFILE_MARKDOWN_BASE}${encodeURIComponent(handle)}`,
+  ];
+
+  const { text, pageUrl, attempts } = await fetchTextFromCandidates(
+    pageUrls,
+    "text/plain, text/markdown;q=0.9, text/html;q=0.8, */*;q=0.5"
+  );
+
+  const urls = extractBadgeAssetUrls(text, badgeId);
+  if (urls.length === 0) {
+    throw new Error(`badge image url not found in profile page for ${badgeId}`);
+  }
+
+  const best = urls.sort((a, b) => scoreBySize(b) - scoreBySize(a))[0]!;
+  BADGE_URL_CACHE.set(badgeId, best);
+
+  return {
+    url: best,
+    debug: {
+      ok: true,
+      source: badgeId,
+      resolvedUrl: best,
+      pageUrl,
+      pageAttempts: attempts,
+      extractedUrls: urls,
+    } satisfies AssetDebug,
+  };
+}
+
+async function resolveBadgeImageUrlFromBadgePage(
+  badgeId: string,
+  handle: string
 ): Promise<ResolvedAssetPage> {
   const cached = BADGE_URL_CACHE.get(badgeId);
   if (cached) {
@@ -444,41 +500,36 @@ async function resolveBadgeImageUrlFromBadgePage(
   ];
 
   const { html, pageUrl, attempts } = await fetchHtmlFromCandidates(pageUrls);
-  const id = escRe(badgeId);
+  try {
+    const urls = extractBadgeAssetUrls(html, badgeId);
 
-  let urls = collectMatchedAssetUrls(
-    html,
-    new RegExp(
-      String.raw`(?:(?:https?:)?\/\/[^"' <>\n]+)?\/profile_badge(?:\/profile)?(?:\/\d{2,4}x\d{2,4})?\/${id}[^"' <>\n]*\.(?:avif|png|svg|webp)(?:\?[^"' <>\n]*)?`,
-      "ig"
-    )
-  );
+    if (urls.length === 0) {
+      throw new Error(`badge image url not found in badge page for badgeId=${badgeId}`);
+    }
 
-  if (urls.length === 0) {
-    urls = collectMatchedAssetUrls(
-      html,
-      /(?:(?:https?:)?\/\/[^"' <>\n]+)?\/profile_badge(?:\/profile)?(?:\/\d{2,4}x\d{2,4})?\/[^"' <>\n]*\.(?:avif|png|svg|webp)(?:\?[^"' <>\n]*)?/ig
-    );
+    const best = urls.sort((a, b) => scoreBySize(b) - scoreBySize(a))[0]!;
+    BADGE_URL_CACHE.set(badgeId, best);
+
+    return {
+      url: best,
+      debug: {
+        ok: true,
+        source: badgeId,
+        resolvedUrl: best,
+        pageUrl,
+        pageAttempts: attempts,
+        extractedUrls: urls,
+      } satisfies AssetDebug,
+    };
+  } catch (detailErr) {
+    try {
+      return await resolveBadgeImageUrlFromProfileMarkdown(handle, badgeId);
+    } catch (profileErr) {
+      throw new Error(
+        `badge resolve failed (${safeErrorMessage(detailErr)}; ${safeErrorMessage(profileErr)})`
+      );
+    }
   }
-
-  if (urls.length === 0) {
-    throw new Error(`badge image url not found in badge page for badgeId=${badgeId}`);
-  }
-
-  const best = urls.sort((a, b) => scoreBySize(b) - scoreBySize(a))[0]!;
-  BADGE_URL_CACHE.set(badgeId, best);
-
-  return {
-    url: best,
-    debug: {
-      ok: true,
-      source: badgeId,
-      resolvedUrl: best,
-      pageUrl,
-      pageAttempts: attempts,
-      extractedUrls: urls,
-    } satisfies AssetDebug,
-  };
 }
 
 export async function GET(req: Request) {
@@ -566,7 +617,7 @@ export async function GET(req: Request) {
     const badgeId = (u as any).badgeId as string | undefined;
     if (badgeId) {
       try {
-        const badgeResolved = await resolveBadgeImageUrlFromBadgePage(badgeId);
+        const badgeResolved = await resolveBadgeImageUrlFromBadgePage(badgeId, handle);
         const badgeResult = await fetchAssetFromCandidates(badgeId, [badgeResolved.url]);
         badgeDataUri = badgeResult.dataUri;
         assets.badge = {
