@@ -47,39 +47,28 @@ Enable `streak=true` in the studio if you want the `Max Streak` row and the rece
 
 <table>
   <tr>
-    <td align="center">
-      <strong>v1</strong><br />
-      Classic layout
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
+    <td align="center" width="50%">
+      <strong>v=1, streak=false</strong><br />
       <a href="https://solved.ac/en/profile/kookjd7759">
-        <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=1" alt="solved.ac stats v1" />
+        <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=1&streak=false" alt="solved.ac stats v1 without streak" />
+      </a>
+    </td>
+    <td align="center" width="50%">
+      <strong>v=1, streak=true</strong><br />
+      <a href="https://solved.ac/en/profile/kookjd7759">
+        <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=1&streak=true" alt="solved.ac stats v1 with streak" />
       </a>
     </td>
   </tr>
   <tr>
-    <td align="center">
-      <strong>v2</strong><br />
-      Minimal layout
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
+    <td align="center" width="50%">
+      <strong>v=2, streak=false</strong><br />
       <a href="https://solved.ac/en/profile/kookjd7759">
-        <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2" alt="solved.ac stats v2" />
+        <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2&streak=false" alt="solved.ac stats v2 without streak" />
       </a>
     </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <strong>v2 + streak=true</strong><br />
-      Minimal layout with Max Streak and recent 1-year grass
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
+    <td align="center" width="50%">
+      <strong>v=2, streak=true</strong><br />
       <a href="https://solved.ac/en/profile/kookjd7759">
         <img src="https://solvedac-readme-stats.vercel.app/api?handle=kookjd7759&v=2&streak=true" alt="solved.ac stats v2 with streak" />
       </a>
