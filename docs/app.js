@@ -10,14 +10,17 @@ const elements = {
   messageCard: document.querySelector("#message-card"),
   apiUrl: document.querySelector("#api-url"),
   openSvgLink: document.querySelector("#open-svg-link"),
+  streakInput: document.querySelector("#streak-input"),
   versionCards: Array.from(document.querySelectorAll(".version-card")),
 };
 
 const state = {
   draftHandle: "",
   draftVersion: "2",
+  draftShowStreak: false,
   submittedHandle: "",
   submittedVersion: "2",
+  submittedShowStreak: false,
   previewUrl: "",
 };
 
@@ -46,6 +49,11 @@ function boot() {
       event.preventDefault();
       renderCard();
     }
+  });
+
+  elements.streakInput.addEventListener("change", () => {
+    state.draftShowStreak = elements.streakInput.checked;
+    syncApiUrl();
   });
 
   elements.previewImage.addEventListener("load", () => {
@@ -84,7 +92,7 @@ function syncVersionCards() {
 function buildApiUrl(handle, version, options = {}) {
   if (!handle) return "";
 
-  const { download = false, cacheBust = false } = options;
+  const { download = false, cacheBust = false, streak = false } = options;
   const url = new URL(API_BASE);
 
   url.searchParams.set("handle", handle);
@@ -93,6 +101,8 @@ function buildApiUrl(handle, version, options = {}) {
   if (download) {
     url.searchParams.set("download", "1");
   }
+
+  url.searchParams.set("streak", streak ? "true" : "false");
 
   if (cacheBust) {
     url.searchParams.set("_preview", Date.now().toString());
@@ -111,7 +121,9 @@ function buildDownloadFilename() {
 }
 
 function syncApiUrl() {
-  const nextUrl = buildApiUrl(state.draftHandle, state.draftVersion);
+  const nextUrl = buildApiUrl(state.draftHandle, state.draftVersion, {
+    streak: state.draftShowStreak,
+  });
 
   if (!nextUrl) {
     elements.apiUrl.textContent = "Enter a handle to generate the API URL.";
@@ -140,7 +152,11 @@ function renderCard() {
 
   state.submittedHandle = nextHandle;
   state.submittedVersion = state.draftVersion;
-  state.previewUrl = buildApiUrl(nextHandle, state.draftVersion, { cacheBust: true });
+  state.submittedShowStreak = state.draftShowStreak;
+  state.previewUrl = buildApiUrl(nextHandle, state.draftVersion, {
+    cacheBust: true,
+    streak: state.draftShowStreak,
+  });
 
   elements.downloadButton.disabled = true;
   setStatus("loading");
@@ -178,6 +194,7 @@ function downloadSvg() {
   const downloadUrl = buildApiUrl(state.submittedHandle, state.submittedVersion, {
     download: true,
     cacheBust: true,
+    streak: state.submittedShowStreak,
   });
 
   const link = document.createElement("a");

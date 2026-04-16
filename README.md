@@ -114,6 +114,7 @@ Available query parameters.
 
 - `handle`: solved.ac handle
 - `v`: card version (`1` or `2`)
+- `streak`: show the optional recent 1-year streak grass panel when set to `true` and hide it with `false`
 - `download`: return the SVG as an attachment when set to `1`, `true`, or `yes`
 - `debug`: return JSON debug output with `1`, `true`, or `json`
 

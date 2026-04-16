@@ -1,6 +1,6 @@
 export const runtime = "edge";
 
-import { fetchSolvedUser } from "../../lib/solvedac";
+import { fetchSolvedStreakSummary, fetchSolvedUser, fetchSolvedYearlyActivity } from "../../lib/solvedac";
 import * as basic from "../../lib/render";
 
 const CORS_HEADERS: Record<string, string> = {
@@ -394,6 +394,7 @@ export async function GET(req: Request) {
 
   const handle = (searchParams.get("handle") || "").trim();
   const version = (searchParams.get("v") || "1").trim() === "2" ? "2" : "1";
+  const showStreakGrass = truthyParam(searchParams.get("streak"));
   const shouldDownload = truthyParam(searchParams.get("download"));
   const debugMode = ["1", "true", "json"].includes(
     (searchParams.get("debug") || "").trim().toLowerCase()
@@ -530,6 +531,7 @@ export async function GET(req: Request) {
           {
             handle,
             version,
+            showStreakGrass,
             fetchedAt: new Date().toISOString(),
             assetBases: SOLVED_ASSET_BASES,
             user: u,
@@ -542,6 +544,33 @@ export async function GET(req: Request) {
       );
     }
 
+    let streakSummary = null;
+    let streakActivity = null;
+    if (showStreakGrass) {
+      const [summaryResult, activityResult] = await Promise.allSettled([
+        fetchSolvedStreakSummary(handle),
+        fetchSolvedYearlyActivity(handle),
+      ]);
+
+      if (summaryResult.status === "fulfilled") {
+        streakSummary = summaryResult.value;
+      } else {
+        streakSummary = {
+          currentStreak: 0,
+          longestStreak: u.maxStreak ?? 0,
+        };
+      }
+
+      if (activityResult.status === "fulfilled") {
+        streakActivity = activityResult.value;
+      } else {
+        streakActivity = {
+          dailyCounts: {},
+          activeDays: 0,
+        };
+      }
+    }
+
     const renderInput = {
       user: u,
       tierDataUri,
@@ -549,6 +578,9 @@ export async function GET(req: Request) {
       bgDataUri,
       badgeDataUri,
       classDataUri,
+      streakSummary,
+      streakActivity,
+      showStreakGrass,
     };
 
     const svg = version === "2"
@@ -567,6 +599,7 @@ export async function GET(req: Request) {
           {
             handle,
             version,
+            showStreakGrass,
             fetchedAt: new Date().toISOString(),
             error: e?.message || "unknown error",
             assetBases: SOLVED_ASSET_BASES,

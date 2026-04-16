@@ -12,7 +12,7 @@ const cardVersions: { value: CardVersion; label: string; note: string }[] = [
 function buildApiUrl(
   handle: string,
   version: CardVersion,
-  options?: { download?: boolean; cacheKey?: string }
+  options?: { download?: boolean; cacheKey?: string; streak?: boolean }
 ) {
   const nextHandle = handle.trim();
   if (!nextHandle) return '';
@@ -22,6 +22,8 @@ function buildApiUrl(
   if (options?.download) {
     params.set('download', '1');
   }
+
+  params.set('streak', options?.streak ? 'true' : 'false');
 
   if (options?.cacheKey) {
     params.set('_preview', options.cacheKey);
@@ -43,8 +45,10 @@ function buildDownloadFilename(handle: string, version: CardVersion) {
 export default function Home() {
   const [draftHandle, setDraftHandle] = useState('');
   const [draftVersion, setDraftVersion] = useState<CardVersion>('2');
+  const [draftShowStreak, setDraftShowStreak] = useState(false);
   const [submittedHandle, setSubmittedHandle] = useState('');
   const [submittedVersion, setSubmittedVersion] = useState<CardVersion>('2');
+  const [submittedShowStreak, setSubmittedShowStreak] = useState(false);
   const [renderToken, setRenderToken] = useState('');
   const [imageLoaded, setImageLoaded] = useState(false);
   const [statusMessage, setStatusMessage] = useState(
@@ -53,16 +57,17 @@ export default function Home() {
   const [statusTone, setStatusTone] = useState<'neutral' | 'error'>('neutral');
 
   const draftPreviewUrl = useMemo(
-    () => buildApiUrl(draftHandle, draftVersion),
-    [draftHandle, draftVersion]
+    () => buildApiUrl(draftHandle, draftVersion, { streak: draftShowStreak }),
+    [draftHandle, draftVersion, draftShowStreak]
   );
 
   const previewUrl = useMemo(
     () =>
       buildApiUrl(submittedHandle, submittedVersion, {
         cacheKey: renderToken || undefined,
+        streak: submittedShowStreak,
       }),
-    [submittedHandle, submittedVersion, renderToken]
+    [submittedHandle, submittedVersion, renderToken, submittedShowStreak]
   );
 
   function handleSubmit() {
@@ -80,6 +85,7 @@ export default function Home() {
     setStatusMessage('Preview is loading... / 미리보기를 불러오는 중입니다.');
     setSubmittedHandle(nextHandle);
     setSubmittedVersion(draftVersion);
+    setSubmittedShowStreak(draftShowStreak);
     setRenderToken(Date.now().toString());
   }
 
@@ -93,6 +99,7 @@ export default function Home() {
     const downloadUrl = buildApiUrl(submittedHandle, submittedVersion, {
       download: true,
       cacheKey: Date.now().toString(),
+      streak: submittedShowStreak,
     });
 
     const link = document.createElement('a');
@@ -195,6 +202,16 @@ export default function Home() {
                 </div>
               </div>
 
+              <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={draftShowStreak}
+                  onChange={(event) => setDraftShowStreak(event.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-sky-500 focus:ring-sky-200"
+                />
+                <span>Include yearly streak grass</span>
+              </label>
+
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   type="button"
@@ -246,7 +263,9 @@ export default function Home() {
                 </p>
               </div>
               <div className="inline-flex w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
-                {submittedHandle ? `${submittedHandle} / v${submittedVersion}` : 'ready'}
+                {submittedHandle
+                  ? `${submittedHandle} / v${submittedVersion}${submittedShowStreak ? ' / streak' : ''}`
+                  : 'ready'}
               </div>
             </div>
 

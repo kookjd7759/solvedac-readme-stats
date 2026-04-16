@@ -280,6 +280,25 @@ input {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.toggle-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #f8fbff;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.toggle-card input {
+  width: 16px;
+  height: 16px;
+}
+
 .primary-button,
 .secondary-button {
   min-height: 52px;
