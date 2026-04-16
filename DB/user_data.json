@@ -1,0 +1,47 @@
+{
+  "users": {
+    "kookjd7759": {
+      "tier": 19,
+      "solvedCount": 4000,
+      "rank": 2487,
+      "class": 6,
+      "classDecoration": "none",
+      "maxStreak": 28,
+      "profileImagePath": "img/profile/kookjd7759.png",
+      "backgroundId": "event260214_01",
+      "badgeId": "solves_04000"
+    },
+    "dlwjsgud12": {
+      "tier": 19,
+      "solvedCount": 880,
+      "rank": 2298,
+      "class": 5,
+      "classDecoration": "none",
+      "maxStreak": 134,
+      "profileImagePath": "img/profile/dlwjsgud12.png",
+      "backgroundId": "penguin-mahjong",
+      "badgeId": "s3-top-contributor"
+    },
+    "koosaga": {
+      "tier": 31,
+      "solvedCount": 14086,
+      "rank": 1,
+      "class": 10,
+      "classDecoration": "gold",
+      "maxStreak": 24,
+      "profileImagePath": "img/profile/koosaga.png",
+      "backgroundId": "s2020-ruby1",
+      "badgeId": "orangecup"
+    }
+  },
+  "backgrounds": {
+    "event260214_01": "img/background/event260214_01.png",
+    "penguin-mahjong": "img/background/penguin-mahjong.jpg",
+    "s2020-ruby1": "img/background/s2020-ruby1.png"
+  },
+  "badges": {
+    "solves_04000": "img/bedge/solves_04000.png",
+    "s3-top-contributor": "img/bedge/s3-top-contributor.png",
+    "orangecup": "img/bedge/orangecup.png"
+  }
+}
