@@ -29,9 +29,9 @@ export type SolvedYearlyActivity = {
 const DIRECT_API_BASE = "https://solved.ac/api/v3/user/show?handle=";
 const FALLBACK_PROXY_BASE = "https://r.jina.ai/http://solved.ac/api/v3/user/show?handle=";
 const PROFILE_MARKDOWN_BASE = "https://r.jina.ai/http://solved.ac/en/profile/";
-const BOJ_ACCEPTED_STATUS_BASE = "https://www.acmicpc.net/status";
+const BOJ_USER_PAGE_BASE = "https://www.acmicpc.net/user/";
 const CACHE_TTL_MS = 5 * 60 * 1000;
-const STREAK_DAY_SHIFT_MS = 3 * 60 * 60 * 1000;
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const YEARLY_STREAK_GRID_DAYS = 53 * 7;
 
 const USER_CACHE = new Map<string, { value: SolvedUser; expiresAt: number }>();
@@ -158,10 +158,6 @@ async function fetchProfileStreakViaMarkdown(handle: string): Promise<SolvedStre
   return parseSolvedStreakSummary(body);
 }
 
-function dateKeyFromTimestampMs(timestampMs: number) {
-  return new Date(timestampMs + STREAK_DAY_SHIFT_MS).toISOString().slice(0, 10);
-}
-
 function utcDateFromDateKey(dateKey: string) {
   const [year, month, day] = dateKey.split("-").map(Number);
   return new Date(Date.UTC(year!, (month || 1) - 1, day || 1));
@@ -181,40 +177,40 @@ function addUtcDays(date: Date, days: number) {
 }
 
 function getYearlyGridStartDateKey(nowMs = Date.now()) {
-  const todayKey = dateKeyFromTimestampMs(nowMs);
+  const todayKey = new Date(nowMs + KST_OFFSET_MS).toISOString().slice(0, 10);
   const today = utcDateFromDateKey(todayKey);
   const gridEnd = addUtcDays(today, 6 - today.getUTCDay());
   return formatUtcDateKey(addUtcDays(gridEnd, -(YEARLY_STREAK_GRID_DAYS - 1)));
 }
 
-type AcceptedStatusPage = {
-  timestampsMs: number[];
-  nextTop: string | null;
-};
+type UserDayProblemsEntry = [number, number];
 
-function parseAcceptedStatusPage(html: string): AcceptedStatusPage {
-  const timestampsMs = Array.from(html.matchAll(/data-timestamp="(\d+)"/g))
-    .map((match) => Number(match[1]) * 1000)
-    .filter((value) => Number.isFinite(value) && value > 0);
-
-  const nextTop =
-    html.match(/<a\s+href="[^"]*?(?:top=|&amp;top=)(\d+)[^"]*"\s+id="next_page"/i)?.[1] || null;
-
-  return { timestampsMs, nextTop };
-}
-
-async function fetchAcceptedStatusPage(
-  handle: string,
-  top?: string
-): Promise<AcceptedStatusPage> {
-  const url = new URL(BOJ_ACCEPTED_STATUS_BASE);
-  url.searchParams.set("user_id", handle);
-  url.searchParams.set("result_id", "4");
-  if (top) {
-    url.searchParams.set("top", top);
+function formatUserDayProblemDateKey(rawDate: number) {
+  const value = String(rawDate);
+  if (!/^\d{8}$/.test(value)) {
+    throw new Error("invalid BOJ user_day_problems date");
   }
 
-  const res = await fetch(url.toString(), {
+  return `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`;
+}
+
+function parseUserDayProblems(html: string): UserDayProblemsEntry[] {
+  const match = html.match(/const\s+user_day_problems\s*=\s*(\[[\s\S]*?\]);/);
+  if (!match?.[1]) {
+    throw new Error("BOJ user page parse error: user_day_problems not found");
+  }
+
+  const parsed = JSON.parse(match[1]) as UserDayProblemsEntry[];
+  if (!Array.isArray(parsed)) {
+    throw new Error("BOJ user page parse error: invalid user_day_problems payload");
+  }
+
+  return parsed;
+}
+
+async function fetchUserDayProblems(handle: string): Promise<UserDayProblemsEntry[]> {
+  const url = `${BOJ_USER_PAGE_BASE}${encodeURIComponent(handle)}`;
+  const res = await fetch(url, {
     headers: {
       Accept: "text/html,application/xhtml+xml",
       "Accept-Language": "ko,en-US;q=0.9,en;q=0.8",
@@ -226,10 +222,10 @@ async function fetchAcceptedStatusPage(
 
   const body = await res.text();
   if (!res.ok) {
-    throw new Error(`BOJ accepted status fetch failed (${res.status})`);
+    throw new Error(`BOJ user page fetch failed (${res.status})`);
   }
 
-  return parseAcceptedStatusPage(body);
+  return parseUserDayProblems(body);
 }
 
 export async function fetchSolvedUser(handle: string): Promise<SolvedUser> {
@@ -281,40 +277,19 @@ export async function fetchSolvedYearlyActivity(
   if (cached && cached.expiresAt > Date.now()) return cached.value;
 
   const thresholdKey = getYearlyGridStartDateKey();
-  const thresholdDayMs = utcDateFromDateKey(thresholdKey).getTime();
   const dailyCounts = new Map<string, number>();
-  const seenTops = new Set<string>();
-  let nextTop: string | null = null;
 
-  for (let page = 0; page < 240; page += 1) {
-    const statusPage = await fetchAcceptedStatusPage(cleanHandle, nextTop || undefined);
-
-    if (statusPage.timestampsMs.length === 0) {
-      break;
+  for (const [rawDate, count] of await fetchUserDayProblems(cleanHandle)) {
+    const dateKey = formatUserDayProblemDateKey(rawDate);
+    if (dateKey < thresholdKey) {
+      continue;
     }
 
-    for (const timestampMs of statusPage.timestampsMs) {
-      const dateKey = dateKeyFromTimestampMs(timestampMs);
-      const dayMs = utcDateFromDateKey(dateKey).getTime();
-      if (dayMs < thresholdDayMs) continue;
-
-      dailyCounts.set(dateKey, (dailyCounts.get(dateKey) || 0) + 1);
+    if (!Number.isFinite(count) || count <= 0) {
+      continue;
     }
 
-    const oldestTimestampMs = Math.min(...statusPage.timestampsMs);
-    const oldestDateKey = dateKeyFromTimestampMs(oldestTimestampMs);
-    const oldestDayMs = utcDateFromDateKey(oldestDateKey).getTime();
-
-    if (!statusPage.nextTop || oldestDayMs < thresholdDayMs) {
-      break;
-    }
-
-    if (seenTops.has(statusPage.nextTop)) {
-      break;
-    }
-
-    seenTops.add(statusPage.nextTop);
-    nextTop = statusPage.nextTop;
+    dailyCounts.set(dateKey, count);
   }
 
   const activity: SolvedYearlyActivity = {

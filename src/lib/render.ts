@@ -17,7 +17,7 @@ type RenderInput = {
 };
 
 const font = 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto';
-const STREAK_DAY_SHIFT_MS = 3 * 60 * 60 * 1000;
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const YEARLY_STREAK_GRID_DAYS = 53 * 7;
 
 function getTierAccentColor(tier: number) {
@@ -102,7 +102,7 @@ function addUtcDays(date: Date, days: number) {
 }
 
 function getTodayDateKey() {
-    return new Date(Date.now() + STREAK_DAY_SHIFT_MS).toISOString().slice(0, 10);
+    return new Date(Date.now() + KST_OFFSET_MS).toISOString().slice(0, 10);
 }
 
 function buildYearlyGridDates() {
