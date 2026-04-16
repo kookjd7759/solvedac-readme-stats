@@ -113,12 +113,10 @@ If you omit the version parameter, `v=1` is used by default.
 
 ### v2
 
-Minimal border layout with the solved background area applied to the top section.
-
-상단 배경 영역이 적용된 미니멀 보더 레이아웃입니다.
-
+Minimal border layout with the solved background area applied to the top section.  
 If you add `streak=true`, the card also renders a `Max Streak` row and a compact recent 1-year grass section.
 
+상단 배경 영역이 적용된 미니멀 보더 레이아웃입니다.  
 `streak=true`를 추가하면 `Max Streak` 행과 최근 1년 잔디 섹션도 함께 렌더링됩니다.
 
 ```markdown
@@ -158,15 +156,9 @@ This repository includes a static GitHub Pages app in [`docs/`](./docs) and a de
 
 The Pages app uses the deployed Vercel API to render cards and download the exact SVG response.
 
-이 저장소에는 [`docs/`](./docs) 기반의 GitHub Pages 웹 앱과 [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml) 배포 워크플로가 포함되어 있습니다.
-
-Pages 웹은 배포된 Vercel API를 사용해 카드를 렌더링하고, 화면에 보이는 SVG를 그대로 내려받습니다.
-
 ## Deploy Your Own
 
 Fork this repository and deploy the API to Vercel.
-
-이 저장소를 포크한 뒤 API를 Vercel에 직접 배포해서 사용할 수도 있습니다.
 
 1. Fork this repository.
 2. Deploy the Next.js app to Vercel.
@@ -176,8 +168,6 @@ Fork this repository and deploy the API to Vercel.
 ## Development
 
 Run the development server.
-
-개발 서버 실행:
 
 ```bash
 npm run dev
@@ -196,9 +186,6 @@ Example local test URLs:
 
 solved.ac is a competitive programming profile service built around Baekjoon Online Judge (BOJ).  
 This project uses solved.ac public profile data to generate dynamic README cards.
-
-solved.ac는 백준 온라인 저지(BOJ)를 중심으로 만들어진 알고리즘 프로필 서비스입니다.  
-이 프로젝트는 solved.ac 공개 프로필 데이터를 이용해 동적 README 카드를 생성합니다.
 
 ## License
 
