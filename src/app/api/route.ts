@@ -34,6 +34,11 @@ type AssetDebug = {
   error?: string;
 };
 
+type ResolvedAssetPage = {
+  url: string;
+  debug: AssetDebug;
+};
+
 function uniqueStrings(values: string[]) {
   return [...new Set(values.filter(Boolean))];
 }
@@ -110,6 +115,7 @@ function resolveAssetBases() {
 
 const SOLVED_ASSET_BASES = resolveAssetBases();
 const PRIMARY_ASSET_BASE = SOLVED_ASSET_BASES[0] || "https://static.solved.ac";
+const SOLVED_PROFILE_MARKDOWN_BASE = "https://r.jina.ai/http://solved.ac/en/profile/";
 
 function normalizeAssetUrl(rawUrl: string, base = PRIMARY_ASSET_BASE) {
   const value = rawUrl.trim();
@@ -256,6 +262,37 @@ async function fetchHtmlFromCandidates(pageUrls: string[]) {
   throw new Error(attempts.at(-1)?.error || "page fetch failed");
 }
 
+async function fetchTextFromCandidates(pageUrls: string[], accept: string) {
+  const attempts: FetchAttempt[] = [];
+
+  for (const pageUrl of uniqueStrings(pageUrls)) {
+    try {
+      const res = await fetch(pageUrl, {
+        headers: {
+          Accept: accept,
+          "Accept-Language": "en-US,en;q=0.9,ko;q=0.8",
+        },
+        cache: "no-store",
+      });
+
+      if (!res.ok) throw new Error(`page fetch error ${res.status}: ${pageUrl}`);
+
+      const text = await res.text();
+      attempts.push({ url: pageUrl, ok: true, contentType: res.headers.get("content-type") });
+
+      return { text, pageUrl, attempts };
+    } catch (err) {
+      attempts.push({
+        url: pageUrl,
+        ok: false,
+        error: safeErrorMessage(err),
+      });
+    }
+  }
+
+  throw new Error(attempts.at(-1)?.error || "page fetch failed");
+}
+
 function collectMatchedAssetUrls(html: string, regex: RegExp) {
   const normalizedHtml = html.replace(/\\\//g, "/");
   return uniqueStrings(
@@ -273,30 +310,11 @@ function scoreBySize(url: string) {
 
 const BG_URL_CACHE = new Map<string, string>();
 
-async function resolveBackgroundImageUrl(backgroundId: string) {
-  const cached = BG_URL_CACHE.get(backgroundId);
-  if (cached) {
-    return {
-      url: cached,
-      debug: {
-        ok: true,
-        source: backgroundId,
-        resolvedUrl: cached,
-        extractedUrls: [cached],
-      } satisfies AssetDebug,
-    };
-  }
-
-  const pageUrls = [
-    `https://solved.ac/en/backgrounds/${encodeURIComponent(backgroundId)}`,
-    `https://solved.ac/backgrounds/${encodeURIComponent(backgroundId)}`,
-  ];
-
-  const { html, pageUrl, attempts } = await fetchHtmlFromCandidates(pageUrls);
+function extractBackgroundAssetUrls(text: string, backgroundId: string) {
   const id = escRe(backgroundId);
 
   let urls = collectMatchedAssetUrls(
-    html,
+    text,
     new RegExp(
       String.raw`(?:(?:https?:)?\/\/[^"' <>\n]+)?\/profile_bg\/[^"' <>\n]*${id}[^"' <>\n]*\.(?:avif|jpe?g|png|webp)(?:\?[^"' <>\n]*)?`,
       "ig"
@@ -305,13 +323,30 @@ async function resolveBackgroundImageUrl(backgroundId: string) {
 
   if (urls.length === 0) {
     urls = collectMatchedAssetUrls(
-      html,
+      text,
       /(?:(?:https?:)?\/\/[^"' <>\n]+)?\/profile_bg\/[^"' <>\n]*\.(?:avif|jpe?g|png|webp)(?:\?[^"' <>\n]*)?/ig
     );
   }
 
+  return urls;
+}
+
+async function resolveBackgroundImageUrlFromProfileMarkdown(
+  handle: string,
+  backgroundId: string
+): Promise<ResolvedAssetPage> {
+  const pageUrls = [
+    `${SOLVED_PROFILE_MARKDOWN_BASE}${encodeURIComponent(handle)}`,
+  ];
+
+  const { text, pageUrl, attempts } = await fetchTextFromCandidates(
+    pageUrls,
+    "text/plain, text/markdown;q=0.9, text/html;q=0.8, */*;q=0.5"
+  );
+
+  const urls = extractBackgroundAssetUrls(text, backgroundId);
   if (urls.length === 0) {
-    throw new Error(`background image url not found for ${backgroundId}`);
+    throw new Error(`background image url not found in profile page for ${backgroundId}`);
   }
 
   const best = urls.sort((a, b) => scoreBySize(b) - scoreBySize(a))[0]!;
@@ -330,9 +365,66 @@ async function resolveBackgroundImageUrl(backgroundId: string) {
   };
 }
 
+async function resolveBackgroundImageUrl(
+  backgroundId: string,
+  handle: string
+): Promise<ResolvedAssetPage> {
+  const cached = BG_URL_CACHE.get(backgroundId);
+  if (cached) {
+    return {
+      url: cached,
+      debug: {
+        ok: true,
+        source: backgroundId,
+        resolvedUrl: cached,
+        extractedUrls: [cached],
+      } satisfies AssetDebug,
+    };
+  }
+
+  const pageUrls = [
+    `https://solved.ac/en/backgrounds/${encodeURIComponent(backgroundId)}`,
+    `https://solved.ac/backgrounds/${encodeURIComponent(backgroundId)}`,
+  ];
+
+  try {
+    const { html, pageUrl, attempts } = await fetchHtmlFromCandidates(pageUrls);
+    const urls = extractBackgroundAssetUrls(html, backgroundId);
+
+    if (urls.length === 0) {
+      throw new Error(`background image url not found for ${backgroundId}`);
+    }
+
+    const best = urls.sort((a, b) => scoreBySize(b) - scoreBySize(a))[0]!;
+    BG_URL_CACHE.set(backgroundId, best);
+
+    return {
+      url: best,
+      debug: {
+        ok: true,
+        source: backgroundId,
+        resolvedUrl: best,
+        pageUrl,
+        pageAttempts: attempts,
+        extractedUrls: urls,
+      } satisfies AssetDebug,
+    };
+  } catch (detailErr) {
+    try {
+      return await resolveBackgroundImageUrlFromProfileMarkdown(handle, backgroundId);
+    } catch (profileErr) {
+      throw new Error(
+        `background resolve failed (${safeErrorMessage(detailErr)}; ${safeErrorMessage(profileErr)})`
+      );
+    }
+  }
+}
+
 const BADGE_URL_CACHE = new Map<string, string>();
 
-async function resolveBadgeImageUrlFromBadgePage(badgeId: string) {
+async function resolveBadgeImageUrlFromBadgePage(
+  badgeId: string
+): Promise<ResolvedAssetPage> {
   const cached = BADGE_URL_CACHE.get(badgeId);
   if (cached) {
     return {
@@ -445,7 +537,7 @@ export async function GET(req: Request) {
     const bgId = (u as any).backgroundId as string | undefined;
     if (bgId) {
       try {
-        const bgResolved = await resolveBackgroundImageUrl(bgId);
+        const bgResolved = await resolveBackgroundImageUrl(bgId, handle);
         const bgResult = await fetchAssetFromCandidates(bgId, [bgResolved.url]);
         bgDataUri = bgResult.dataUri;
         assets.background = {
