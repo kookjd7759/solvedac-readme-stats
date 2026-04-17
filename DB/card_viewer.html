@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>solvedac Local Card Viewer</title>
+    <meta
+      name="description"
+      content="Render solved.ac cards from local DB/user_data.json without calling the live API."
+    />
+    <link rel="stylesheet" href="../docs/styles.css" />
+    <style>
+      .preview-stage {
+        align-items: stretch;
+      }
+
+      .preview-canvas {
+        width: 100%;
+        min-height: 420px;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        border: 1px solid rgba(217, 228, 243, 0.9);
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.96));
+      }
+
+      .preview-canvas svg {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .viewer-note {
+        margin-top: 14px;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.7;
+      }
+
+      .viewer-note code {
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero-card">
+        <div class="hero-copy">
+          <p class="eyebrow">local card viewer</p>
+          <h1>Render cards directly from <code>DB/user_data.json</code>.</h1>
+          <p class="hero-text">
+            Enter a handle from your saved local database, choose <code>v1</code> or <code>v2</code>,
+            toggle <code>streak</code>, and the browser will build the exact SVG card on the spot.
+          </p>
+          <p class="hero-text hero-text-ko">
+            라이브 API를 다시 호출하지 않고, 현재 저장된 <code>user_data.json</code>과 <code>img</code> 폴더만으로 카드를 만듭니다.
+          </p>
+        </div>
+        <a
+          class="hero-link"
+          href="./user_data.json"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Open user_data.json
+        </a>
+      </section>
+
+      <section class="studio-grid">
+        <aside class="control-card">
+          <div class="section-head">
+            <div>
+              <h2>Local Controls</h2>
+              <p>Load one saved handle and render a card from local data.</p>
+            </div>
+            <span class="status-pill" id="status-pill">loading</span>
+          </div>
+
+          <div class="field-group">
+            <label for="handle-input">saved handle</label>
+            <input
+              id="handle-input"
+              type="text"
+              value=""
+              placeholder="koosaga"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="field-group">
+            <span class="group-label">version</span>
+            <div class="version-grid">
+              <label class="version-card">
+                <input type="radio" name="version" value="1" />
+                <span class="version-title">v1</span>
+                <span class="version-note">Classic layout</span>
+              </label>
+              <label class="version-card version-card-active">
+                <input type="radio" name="version" value="2" checked />
+                <span class="version-title">v2</span>
+                <span class="version-note">Minimal layout</span>
+              </label>
+            </div>
+          </div>
+
+          <label class="toggle-card" for="streak-input">
+            <input id="streak-input" type="checkbox" />
+            <span>Streak</span>
+          </label>
+
+          <div class="button-row">
+            <button type="button" id="render-button" class="primary-button">Render</button>
+            <button type="button" id="download-button" class="secondary-button" disabled>
+              Download SVG
+            </button>
+          </div>
+
+          <div class="info-card">
+            <p class="info-label">data source</p>
+            <code id="data-source">Loading ./user_data.json ...</code>
+          </div>
+
+          <div class="button-row">
+            <button type="button" id="load-json-button" class="secondary-button">
+              Load user_data.json
+            </button>
+          </div>
+          <input
+            id="json-file-input"
+            type="file"
+            accept=".json,application/json"
+            hidden
+          />
+
+          <div class="message-card" id="message-card">
+            Loading local database...
+          </div>
+
+          <p class="viewer-note">
+            If this page cannot load <code>user_data.json</code>, open the repository through a local web server
+            such as <code>python -m http.server</code>.
+          </p>
+        </aside>
+
+        <section class="preview-card">
+          <div class="section-head">
+            <div>
+              <h2>Preview</h2>
+              <p>The SVG is rendered in-browser from your local DB files.</p>
+            </div>
+            <a
+              id="open-svg-link"
+              class="preview-link"
+              href="#"
+              aria-disabled="true"
+            >
+              Open SVG
+            </a>
+          </div>
+
+          <div class="preview-stage">
+            <div class="preview-empty" id="preview-empty">
+              <p class="preview-empty-title">No preview yet</p>
+              <p class="preview-empty-copy">
+                Enter a saved handle and press Render.
+              </p>
+            </div>
+            <div id="preview-canvas" class="preview-canvas" hidden></div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./card_viewer.js" defer></script>
+  </body>
+</html>

@@ -12,7 +12,7 @@ from parser import get_list
 from path import PATH_USERLIST, PATH_BASE
 
 START_PAGE = 1
-END_PAGE = 2000
+END_PAGE = 2003
 
 EXPECTED_TITLE_KEYWORD = "랭킹"
 EXPECTED_PROFILE_MARKER = "/profile/"
