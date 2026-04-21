@@ -23,6 +23,14 @@
   <img width="90%" alt="프로젝트 상단 미리보기" src="https://github.com/user-attachments/assets/4cdd7abc-70dd-4506-b4f4-b969cf010eef" />
 </p>
 
+<p align="center">
+  <img width="90%" alt="플래티넘 기록 보관소 미리보기 1" src="https://github.com/user-attachments/assets/f9b62a2a-8f5c-4657-b921-7c0ab7cfed85" />
+</p>
+
+<p align="center">
+  <img width="90%" alt="플래티넘 기록 보관소 미리보기 2" src="https://github.com/user-attachments/assets/19b6af9d-8f28-48b7-9ada-773b8cda067e" />
+</p>
+
 ## 1. README 프로젝트
 
 이 프로젝트의 시작점은 아주 분명합니다.  
