@@ -1,7 +1,10 @@
 export const runtime = "nodejs";
 
+import { readFile } from "node:fs/promises";
+import { isAbsolute, join } from "node:path";
 import { fetchSolvedUser, fetchSolvedYearlyActivity } from "../../lib/solvedac";
 import * as basic from "../../lib/render";
+import { getUserDataPreset } from "../../lib/userdata";
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -116,6 +119,10 @@ function resolveAssetBases() {
 const SOLVED_ASSET_BASES = resolveAssetBases();
 const PRIMARY_ASSET_BASE = SOLVED_ASSET_BASES[0] || "https://static.solved.ac";
 const SOLVED_PROFILE_MARKDOWN_BASE = "https://r.jina.ai/http://solved.ac/en/profile/";
+const LOCAL_USER_ASSET_PATHS: Record<string, string> = {
+  "profile/0501.jpg": join(process.cwd(), "DB", "img", "profile", "0501.jpg"),
+  "background/0501_back.jpg": join(process.cwd(), "DB", "img", "background", "0501_back.jpg"),
+};
 
 function normalizeAssetUrl(rawUrl: string, base = PRIMARY_ASSET_BASE) {
   const value = rawUrl.trim();
@@ -159,6 +166,68 @@ function mimeFromAssetUrl(url: string, fallback?: string) {
   if (lower.endsWith(".avif")) return "image/avif";
   if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
   return fallback;
+}
+
+function mimeFromLocalPath(path: string) {
+  return mimeFromAssetUrl(path, "application/octet-stream") || "application/octet-stream";
+}
+
+function resolveLocalAssetPath(sourcePath: string) {
+  const normalized = sourcePath.replace(/\\/g, "/").replace(/^\/+/, "");
+  if (!normalized || normalized.includes("..")) {
+    throw new Error(`invalid local asset path: ${sourcePath}`);
+  }
+  const resolved = LOCAL_USER_ASSET_PATHS[normalized];
+  if (!resolved) {
+    throw new Error(`unsupported local asset path: ${sourcePath}`);
+  }
+  return resolved;
+}
+
+async function fetchLocalFileAsDataUri(sourcePath: string) {
+  const resolvedPath = isAbsolute(sourcePath)
+    ? sourcePath
+    : resolveLocalAssetPath(sourcePath);
+  const attempts: FetchAttempt[] = [];
+
+  try {
+    const fileBuffer = await readFile(resolvedPath);
+    const mime = mimeFromLocalPath(resolvedPath);
+    const b64 = fileBuffer.toString("base64");
+
+    attempts.push({
+      url: resolvedPath,
+      ok: true,
+      contentType: mime,
+    });
+
+    return {
+      dataUri: `data:${mime};base64,${b64}`,
+      debug: {
+        ok: true,
+        source: sourcePath,
+        resolvedUrl: resolvedPath,
+        attempts,
+      } satisfies AssetDebug,
+    };
+  } catch (err) {
+    attempts.push({
+      url: resolvedPath,
+      ok: false,
+      error: safeErrorMessage(err),
+    });
+
+    return {
+      dataUri: "",
+      debug: {
+        ok: false,
+        source: sourcePath,
+        resolvedUrl: resolvedPath,
+        attempts,
+        error: attempts.at(-1)?.error || "local file read failed",
+      } satisfies AssetDebug,
+    };
+  }
 }
 
 async function fetchAsDataUri(url: string, forcedMime?: string) {
@@ -564,7 +633,8 @@ export async function GET(req: Request) {
   }
 
   try {
-    const u = await fetchSolvedUser(handle);
+    const preset = getUserDataPreset(handle);
+    const u = preset ? preset.user : await fetchSolvedUser(handle);
     const assets: Record<string, AssetDebug> = {};
 
     const tier = u.tier ?? 0;
@@ -576,41 +646,47 @@ export async function GET(req: Request) {
     const tierDataUri = tierResult.dataUri;
     assets.tier = tierResult.debug;
 
-    const avatarSource = u.profileImageUrl || "/misc/360x360/default_profile.png";
-    const avatarResult = await fetchAssetFromCandidates(
-      avatarSource,
-      assetCandidatesFromRaw(avatarSource)
-    );
+    const avatarSource =
+      preset?.profileImagePath || u.profileImageUrl || "/misc/360x360/default_profile.png";
+    const avatarResult = preset?.profileImagePath
+      ? await fetchLocalFileAsDataUri(preset.profileImagePath)
+      : await fetchAssetFromCandidates(avatarSource, assetCandidatesFromRaw(avatarSource));
     const avatarDataUri = avatarResult.dataUri;
     assets.avatar = avatarResult.debug;
 
     let bgDataUri = "";
-    const bgId = (u as any).backgroundId as string | undefined;
-    if (bgId) {
-      try {
-        const bgResolved = await resolveBackgroundImageUrl(bgId, handle);
-        const bgResult = await fetchAssetFromCandidates(bgId, [bgResolved.url]);
-        bgDataUri = bgResult.dataUri;
-        assets.background = {
-          ...bgResolved.debug,
-          ...bgResult.debug,
-          pageUrl: bgResolved.debug.pageUrl,
-          pageAttempts: bgResolved.debug.pageAttempts,
-          extractedUrls: bgResolved.debug.extractedUrls,
-        };
-      } catch (err) {
+    if (preset?.backgroundImagePath) {
+      const bgResult = await fetchLocalFileAsDataUri(preset.backgroundImagePath);
+      bgDataUri = bgResult.dataUri;
+      assets.background = bgResult.debug;
+    } else {
+      const bgId = (u as any).backgroundId as string | undefined;
+      if (bgId) {
+        try {
+          const bgResolved = await resolveBackgroundImageUrl(bgId, handle);
+          const bgResult = await fetchAssetFromCandidates(bgId, [bgResolved.url]);
+          bgDataUri = bgResult.dataUri;
+          assets.background = {
+            ...bgResolved.debug,
+            ...bgResult.debug,
+            pageUrl: bgResolved.debug.pageUrl,
+            pageAttempts: bgResolved.debug.pageAttempts,
+            extractedUrls: bgResolved.debug.extractedUrls,
+          };
+        } catch (err) {
+          assets.background = {
+            ok: false,
+            source: bgId,
+            error: safeErrorMessage(err),
+          };
+        }
+      } else {
         assets.background = {
           ok: false,
-          source: bgId,
-          error: safeErrorMessage(err),
+          source: null,
+          error: "backgroundId not present in solved.ac user payload",
         };
       }
-    } else {
-      assets.background = {
-        ok: false,
-        source: null,
-        error: "backgroundId not present in solved.ac user payload",
-      };
     }
 
     let badgeDataUri = "";
@@ -673,6 +749,7 @@ export async function GET(req: Request) {
         JSON.stringify(
           {
             handle,
+            preset: preset ? handle.trim().toLowerCase() : null,
             version,
             showStreakGrass,
             fetchedAt: new Date().toISOString(),

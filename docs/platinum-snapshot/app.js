@@ -29,6 +29,20 @@ const STREAK_DAY_SHIFT_MS = 3 * 60 * 60 * 1000;
 const YEARLY_STREAK_GRID_DAYS = 53 * 7;
 const INITIAL_RANKING_VISIBLE = 72;
 const RANKING_LOAD_STEP = 72;
+const EASTER_EGG_HANDLE = "0501";
+const EASTER_EGG_RECORD = {
+  handle: EASTER_EGG_HANDLE,
+  tier: 31,
+  solvedCount: 0,
+  rank: 1,
+  class: 10,
+  classDecoration: "gold",
+  maxStreak: 0,
+  // Opened from docs/platinum-snapshot/index.html, so ../../DB points to repo-root DB.
+  profileImagePath: "../../DB/img/profile/0501.jpg",
+  backgroundPath: "../../DB/img/background/0501_back.jpg",
+  badgePath: "../../DB/img/bedge/solves_04000.png",
+};
 
 const elements = {
   handleInput: document.querySelector("#handle-input"),
@@ -1102,6 +1116,67 @@ function buildDownloadFilename() {
   return `solvedac-${safeHandle}-archive-2026-04-21-v${state.submittedVersion}${streakSuffix}.svg`;
 }
 
+function isEasterEggHandle(handle) {
+  return String(handle || "").trim().toLowerCase() === EASTER_EGG_HANDLE;
+}
+
+function renderEasterEggCard() {
+  const avatarHref =
+    typeof window !== "undefined"
+      ? new URL(EASTER_EGG_RECORD.profileImagePath, window.location.href).href
+      : EASTER_EGG_RECORD.profileImagePath;
+  const bgHref =
+    typeof window !== "undefined"
+      ? new URL(EASTER_EGG_RECORD.backgroundPath, window.location.href).href
+      : EASTER_EGG_RECORD.backgroundPath;
+  const badgeHref =
+    typeof window !== "undefined"
+      ? new URL(EASTER_EGG_RECORD.badgePath, window.location.href).href
+      : EASTER_EGG_RECORD.badgePath;
+
+  const input = {
+    user: {
+      handle: EASTER_EGG_RECORD.handle,
+      tier: EASTER_EGG_RECORD.tier,
+      solvedCount: EASTER_EGG_RECORD.solvedCount,
+      rank: EASTER_EGG_RECORD.rank,
+      class: EASTER_EGG_RECORD.class,
+      classDecoration: EASTER_EGG_RECORD.classDecoration,
+      maxStreak: EASTER_EGG_RECORD.maxStreak,
+    },
+    tierHref: resolveTierAssetHref(EASTER_EGG_RECORD.tier),
+    avatarHref,
+    bgHref,
+    badgeHref,
+    classHref: resolveClassAssetHref(EASTER_EGG_RECORD.class, EASTER_EGG_RECORD.classDecoration),
+    streakSummary: { currentStreak: 0, longestStreak: EASTER_EGG_RECORD.maxStreak },
+    streakActivity: { dailyCounts: {}, activeDays: 0 },
+  };
+
+  const svg =
+    state.draftVersion === "2"
+      ? renderCardV2({
+          ...input,
+          showStreakGrass: state.draftShowStreak,
+        })
+      : renderCard({
+          ...input,
+          showStreakGrass: state.draftShowStreak,
+        });
+
+  state.submittedHandle = EASTER_EGG_RECORD.handle;
+  state.submittedVersion = state.draftVersion;
+  state.submittedShowStreak = state.draftShowStreak;
+  state.previewSvg = svg;
+
+  showPreview(svg);
+  updatePreviewBlob(svg);
+  syncPreviewSummary();
+  renderRankingView();
+  setStatus("preview");
+  setMessage(`${EASTER_EGG_RECORD.handle} easter egg card rendered.`, false);
+}
+
 async function renderLocalCard() {
   const handleInput = state.draftHandle.trim();
   if (!handleInput) {
@@ -1117,6 +1192,11 @@ async function renderLocalCard() {
     elements.downloadButton.disabled = true;
     setStatus("error");
     setMessage("아직 저장본이 로드되지 않았습니다.", true);
+    return;
+  }
+
+  if (isEasterEggHandle(handleInput)) {
+    renderEasterEggCard();
     return;
   }
 
