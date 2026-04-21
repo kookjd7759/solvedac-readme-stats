@@ -1,25 +1,112 @@
 # solvedac-readme-stats
 
-GitHub README에 바로 넣을 수 있는 `solved.ac` 프로필 SVG 카드를 만드는 프로젝트입니다.  
-실시간 카드 생성기와, 백준 플래티넘 V 이상 저장본만으로 동작하는 아카이브 생성기를 함께 제공합니다.
+<p align="center">
+  <img src="https://img.shields.io/badge/README-%EC%B9%B4%EB%93%9C_%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-7a4a22?style=for-the-badge" alt="README 카드 프로젝트" />
+  <img src="https://img.shields.io/badge/SVG-%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C_%EA%B0%80%EB%8A%A5-2f6d7a?style=for-the-badge" alt="SVG 다운로드 가능" />
+  <img src="https://img.shields.io/badge/BOJ-%ED%94%8C%EB%9E%98%ED%8B%B0%EB%84%98_V%2B_%EA%B8%B0%EB%A1%9D_%EB%B3%B4%EA%B4%80%EC%86%8C-3e4c59?style=for-the-badge" alt="BOJ 플래티넘 V+ 기록 보관소" />
+</p>
 
-## 바로가기
+<p align="center">
+  GitHub README에 바로 넣을 수 있는 <code>solved.ac</code> 프로필 SVG 카드를 만들고,<br />
+  실시간 생성기와 정적 기록 보관소까지 함께 제공하는 프로젝트입니다.
+</p>
 
-- 실시간 웹 스튜디오: [https://kookjd7759.github.io/solvedac-readme-stats/](https://kookjd7759.github.io/solvedac-readme-stats/)
-- 플래티넘 아카이브 스튜디오: [https://kookjd7759.github.io/solvedac-readme-stats/platinum-snapshot/](https://kookjd7759.github.io/solvedac-readme-stats/platinum-snapshot/)
-- API 기본 주소: `https://solvedac-readme-stats.vercel.app/api`
+<p align="center">
+  <a href="https://kookjd7759.github.io/solvedac-readme-stats/">실시간 웹 스튜디오</a>
+  ·
+  <a href="https://kookjd7759.github.io/solvedac-readme-stats/platinum-snapshot/">플래티넘 기록 보관소</a>
+  ·
+  <a href="https://solvedac-readme-stats.vercel.app/api">Vercel API</a>
+</p>
 
-<img width="90%" align="center" alt="top" src="https://github.com/user-attachments/assets/4cdd7abc-70dd-4506-b4f4-b969cf010eef" />
-<img width="90%" align="center" alt="rank_1" src="https://github.com/user-attachments/assets/f9b62a2a-8f5c-4657-b921-7c0ab7cfed85" />
-<img width="90%" align="center" alt="rank_2" src="https://github.com/user-attachments/assets/19b6af9d-8f28-48b7-9ada-773b8cda067e" />
+<p align="center">
+  <img width="90%" alt="프로젝트 상단 미리보기" src="https://github.com/user-attachments/assets/4cdd7abc-70dd-4506-b4f4-b969cf010eef" />
+</p>
 
-## 무엇을 할 수 있나요?
+## 1. README 프로젝트
 
-- `solved.ac` 핸들만 넣고 카드 미리보기를 바로 확인할 수 있습니다.
+이 프로젝트의 시작점은 아주 분명합니다.  
+`solved.ac` 핸들만 넣으면 GitHub README에 붙일 수 있는 SVG 카드를 만들고, 웹에서 미리보면서 바로 써먹을 수 있게 하는 것입니다.
+
 - `v1`, `v2` 두 가지 카드 버전을 지원합니다.
-- `streak=true` 옵션으로 최대 연속 풀이와 최근 1년 잔디 섹션을 추가할 수 있습니다.
-- 웹 스튜디오에서 API 주소와 README용 마크다운을 바로 복사할 수 있습니다.
-- 플래티넘 아카이브 스튜디오는 `2026-04-21 09:00 KST` 기준 백준 플래티넘 V 이상 저장본만으로 독립형 SVG를 만듭니다.
+- `streak=true` 옵션으로 최대 연속 풀이와 최근 1년 잔디를 카드에 넣을 수 있습니다.
+- 웹 스튜디오에서 API 주소 복사, README 마크다운 복사, SVG 다운로드까지 한 번에 처리할 수 있습니다.
+
+| 항목 | 주소 | 설명 |
+| --- | --- | --- |
+| 실시간 웹 스튜디오 | [kookjd7759.github.io/solvedac-readme-stats](https://kookjd7759.github.io/solvedac-readme-stats/) | 핸들을 넣고 바로 카드 미리보기 |
+| API | `https://solvedac-readme-stats.vercel.app/api` | README용 SVG 응답 |
+| Pages 메인 앱 | `docs/` | GitHub Pages에서 배포되는 실시간 화면 |
+
+가장 기본적인 사용 예시는 아래와 같습니다.
+
+```markdown
+![solved.ac 카드](https://solvedac-readme-stats.vercel.app/api?handle={handle})
+```
+
+버전을 지정하고 싶다면:
+
+```markdown
+![solved.ac 카드](https://solvedac-readme-stats.vercel.app/api?handle={handle}&v=2)
+```
+
+연속 풀이 섹션까지 포함하고 싶다면:
+
+```markdown
+![solved.ac 카드](https://solvedac-readme-stats.vercel.app/api?handle={handle}&v=2&streak=true)
+```
+
+## 2. 다운로드 가능한 SVG로 확장
+
+이제 이 프로젝트는 단순히 “README에 링크로 넣는 카드”에서 끝나지 않습니다.  
+실시간 웹 스튜디오와 API 모두 **다운로드 가능한 SVG**를 기준으로 사용할 수 있게 구성되어 있습니다.
+
+- 웹 스튜디오에서 미리본 카드를 바로 SVG로 저장할 수 있습니다.
+- API에 `download=1`을 주면 첨부 파일처럼 내려받는 응답으로 바뀝니다.
+- 즉, README 삽입용 링크와 별개로 “파일로 보관하는 카드”도 함께 다룰 수 있습니다.
+
+| 방식 | 예시 | 용도 |
+| --- | --- | --- |
+| 웹에서 다운로드 | 실시간 스튜디오의 `SVG 다운로드` 버튼 | 즉시 저장 |
+| API 다운로드 | `https://solvedac-readme-stats.vercel.app/api?handle={handle}&v=2&download=1` | 직접 파일 받기 |
+| README 삽입 | `![card](.../api?handle={handle})` | README에 바로 표시 |
+
+다운로드 응답 예시는 아래처럼 사용할 수 있습니다.
+
+```text
+https://solvedac-readme-stats.vercel.app/api?handle={handle}&v=2&download=1
+```
+
+지원하는 주요 쿼리 파라미터:
+
+- `handle`: solved.ac 핸들
+- `v`: 카드 버전, `1` 또는 `2`
+- `streak`: `true`이면 연속 풀이 섹션 추가
+- `download`: `1`, `true`, `yes` 중 하나면 SVG 파일 다운로드 응답
+- `debug`: `1`, `true`, `json` 중 하나면 디버그 JSON 응답
+
+## 3. 백준 플래티넘 V 이상 기록 보관소
+
+실시간 요청이 어려워지는 이후까지 생각해서, 이 프로젝트에는 별도의 정적 보관소도 함께 들어 있습니다.  
+여기는 **백준 플래티넘 V 이상 유저 저장본**만 대상으로, 실시간 요청 없이도 카드와 랭크를 다시 열람할 수 있도록 만든 아카이브입니다.
+
+- 기준 시점: `2026-04-21 09:00 KST`
+- 대상 범위: **백준 플래티넘 V 이상**
+- 동작 방식: 저장된 JSON + 저장된 이미지 자산만 사용
+- 특징: 실시간 solved.ac / BOJ 프로필 API를 직접 호출하지 않음
+- 추가 기능: 순위별 열람, 상위권 빠른 이동, 선택한 유저 카드 즉시 SVG 다운로드
+
+| 항목 | 주소 | 설명 |
+| --- | --- | --- |
+| 플래티넘 기록 보관소 | [kookjd7759.github.io/solvedac-readme-stats/platinum-snapshot](https://kookjd7759.github.io/solvedac-readme-stats/platinum-snapshot/) | 정적 저장본 기반 아카이브 |
+| Pages 아카이브 앱 | `docs/platinum-snapshot/` | 순위 보관소 + 카드 생성 |
+| 스냅샷 데이터 | `docs/platinum-snapshot/user_data.js` | 브라우저에서 직접 쓰는 저장본 |
+
+이 보관소는 “상위권부터 순위별로 쭉 열람하고, 그 시점의 카드를 다시 SVG로 내려받는 화면”까지 포함합니다.
+
+<p align="center">
+  <img width="90%" alt="플래티넘 기록 보관소 미리보기" src="https://github.com/user-attachments/assets/f9b62a2a-8f5c-4657-b921-7c0ab7cfed85" />
+</p>
 
 ## 카드 예시
 
@@ -50,67 +137,17 @@ GitHub README에 바로 넣을 수 있는 `solved.ac` 프로필 SVG 카드를 �
   </tr>
 </table>
 
-## 기본 사용법
+## 실시간 스튜디오와 기록 보관소 차이
 
-README에 가장 간단하게 넣으려면 아래처럼 사용하면 됩니다.
+| 구분 | 실시간 스튜디오 | 플래티넘 기록 보관소 |
+| --- | --- | --- |
+| 데이터 원천 | 실시간 API | 저장된 스냅샷 |
+| 대상 | 일반 solved.ac 핸들 | 백준 플래티넘 V 이상 저장본 |
+| 랭크 열람 | 없음 | 있음 |
+| 다운로드 | 가능 | 가능 |
+| 실시간 의존성 | 있음 | 없음 |
 
-```markdown
-![solved.ac 카드](https://solvedac-readme-stats.vercel.app/api?handle={handle})
-```
-
-버전을 지정하고 싶다면:
-
-```markdown
-![solved.ac 카드](https://solvedac-readme-stats.vercel.app/api?handle={handle}&v=2)
-```
-
-연속 풀이 섹션까지 포함하고 싶다면:
-
-```markdown
-![solved.ac 카드](https://solvedac-readme-stats.vercel.app/api?handle={handle}&v=2&streak=true)
-```
-
-## 쿼리 파라미터
-
-- `handle`: solved.ac 핸들
-- `v`: 카드 버전, `1` 또는 `2`
-- `streak`: `true`이면 최대 연속 풀이와 최근 1년 잔디 섹션을 추가
-- `download`: `1`, `true`, `yes` 중 하나면 SVG를 첨부 파일로 응답
-- `debug`: `1`, `true`, `json` 중 하나면 디버그 JSON 응답
-
-## 웹 스튜디오
-
-GitHub Pages의 실시간 웹 스튜디오는 배포된 Vercel API를 호출해 카드를 미리보고 SVG를 저장하는 용도입니다.
-
-- 핸들 입력
-- 카드 버전 선택
-- `streak` 옵션 토글
-- 미리보기 확인
-- API 주소 복사 / README 코드 복사 / SVG 다운로드
-
-## 플래티넘 아카이브 스튜디오
-
-플래티넘 아카이브 스튜디오는 실시간 프로필 요청이 어려워진 이후를 대비한 페이지입니다.
-
-- 기준 시점: `2026-04-21 09:00 KST`
-- 대상 범위: **백준 플래티넘 V 이상**
-- 동작 방식: 저장된 JSON과 저장된 이미지 자산을 이용해 브라우저 안에서 독립형 SVG 생성
-- 특징: solved.ac / BOJ 라이브 프로필 API를 직접 호출하지 않음
-
-## GitHub Pages 구성
-
-- 메인 Pages 앱: [`docs/`](./docs)
-- 플래티넘 아카이브 앱: [`docs/platinum-snapshot/`](./docs/platinum-snapshot)
-- Pages 배포 워크플로: [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml)
-
-## 직접 배포하기
-
-1. 이 저장소를 포크합니다.
-2. Next.js 앱을 Vercel에 배포합니다.
-3. GitHub Pages를 GitHub Actions 기반으로 활성화합니다.
-4. 필요하면 자신의 `/api` 주소를 기준으로 웹 스튜디오를 연결합니다.
-
-## 개발
+## 개발과 배포
 
 개발 서버 실행:
 
@@ -118,17 +155,19 @@ GitHub Pages의 실시간 웹 스튜디오는 배포된 Vercel API를 호출해 
 npm run dev
 ```
 
-실행 후 확인할 주소:
+주요 경로:
+
+- Next.js 앱: `src/`
+- 실시간 Pages 화면: `docs/`
+- 플래티넘 기록 보관소: `docs/platinum-snapshot/`
+- Pages 배포 워크플로: `.github/workflows/deploy-pages.yml`
+
+로컬에서 확인할 수 있는 예시:
 
 - `http://localhost:3000/`
 - `http://localhost:3000/api?handle={handle}&v=1`
 - `http://localhost:3000/api?handle={handle}&v=2`
 - `http://localhost:3000/api?handle={handle}&v=2&streak=true`
-
-## solved.ac / 백준
-
-`solved.ac`는 백준 온라인 저지(BOJ) 기록을 바탕으로 한 프로필 서비스입니다.  
-이 프로젝트는 공개 프로필 데이터를 이용해 GitHub README용 동적 카드를 생성합니다.
 
 ## 라이선스
 
