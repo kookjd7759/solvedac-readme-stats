@@ -42,6 +42,3 @@ next-env.d.ts
 
 .vercel
 .env*.local
-
-# temp
-/DB/img/profile/*
