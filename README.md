@@ -1,9 +1,5 @@
 # solvedac-readme-stats  
 
-<img width="100%" align="center" alt="top" src="https://github.com/user-attachments/assets/785e8cb0-113b-4933-8f16-d563a2205129" />
-<img width="100%" align="center" alt="rank_1" src="https://github.com/user-attachments/assets/cc3035f3-36fa-4b0f-b8e0-f8f91247a759" />
-<img width="100%" align="center" alt="rank_2" src="https://github.com/user-attachments/assets/4cfa7a00-685f-4346-85af-adba0c39fe30" />
-
 <p align="center">
   GitHub README에 바로 넣을 수 있는 <code>solved.ac</code> 프로필 SVG 카드를 만들고,<br />
   실시간 생성기와 정적 기록 보관소까지 함께 제공하는 프로젝트입니다.
@@ -17,17 +13,9 @@
   <a href="https://solvedac-readme-stats.vercel.app/api">Vercel API</a>
 </p>
 
-<p align="center">
-  <img width="90%" alt="프로젝트 상단 미리보기" src="https://github.com/user-attachments/assets/4cdd7abc-70dd-4506-b4f4-b969cf010eef" />
-</p>
-
-<p align="center">
-  <img width="90%" alt="플래티넘 기록 보관소 미리보기 1" src="https://github.com/user-attachments/assets/f9b62a2a-8f5c-4657-b921-7c0ab7cfed85" />
-</p>
-
-<p align="center">
-  <img width="90%" alt="플래티넘 기록 보관소 미리보기 2" src="https://github.com/user-attachments/assets/19b6af9d-8f28-48b7-9ada-773b8cda067e" />
-</p>
+<img width="100%" align="center" alt="top" src="https://github.com/user-attachments/assets/785e8cb0-113b-4933-8f16-d563a2205129" />
+<img width="100%" align="center" alt="rank_1" src="https://github.com/user-attachments/assets/cc3035f3-36fa-4b0f-b8e0-f8f91247a759" />
+<img width="100%" align="center" alt="rank_2" src="https://github.com/user-attachments/assets/4cfa7a00-685f-4346-85af-adba0c39fe30" />
 
 ## 1. README 프로젝트
 
