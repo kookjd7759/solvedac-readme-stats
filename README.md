@@ -9,9 +9,9 @@ GitHub README에 바로 넣을 수 있는 `solved.ac` 프로필 SVG 카드를 �
 - 플래티넘 아카이브 스튜디오: [https://kookjd7759.github.io/solvedac-readme-stats/platinum-snapshot/](https://kookjd7759.github.io/solvedac-readme-stats/platinum-snapshot/)
 - API 기본 주소: `https://solvedac-readme-stats.vercel.app/api`
 
-<img width="90%" align="center" alt="top" src="https://github.com/user-attachments/assets/4cdd7abc-70dd-4506-b4f4-b969cf010eef" />
-<img width="90%" align="center" alt="rank_1" src="https://github.com/user-attachments/assets/f9b62a2a-8f5c-4657-b921-7c0ab7cfed85" />
-<img width="90%" align="center" alt="rank_2" src="https://github.com/user-attachments/assets/19b6af9d-8f28-48b7-9ada-773b8cda067e" />
+<img width="100%" align="center" alt="top" src="https://github.com/user-attachments/assets/4cdd7abc-70dd-4506-b4f4-b969cf010eef" />
+<img width="100%" align="center" alt="rank_1" src="https://github.com/user-attachments/assets/f9b62a2a-8f5c-4657-b921-7c0ab7cfed85" />
+<img width="100%" align="center" alt="rank_2" src="https://github.com/user-attachments/assets/19b6af9d-8f28-48b7-9ada-773b8cda067e" />
 
 ## 무엇을 할 수 있나요?
 
