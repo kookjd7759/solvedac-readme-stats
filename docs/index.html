@@ -3,100 +3,137 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>solvedac-readme-stats Web Studio</title>
+    <title>solved.ac README 카드 스튜디오</title>
     <meta
       name="description"
-      content="Preview solved.ac README cards on GitHub Pages and download the rendered SVG."
+      content="solved.ac README 카드를 실시간으로 미리보고 SVG로 저장할 수 있는 한국어 웹 스튜디오입니다."
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="page-shell">
-      <section class="hero-card">
+      <section class="hero-panel">
         <div class="hero-copy">
-          <p class="eyebrow">solved.ac README card studio</p>
-          <h1>Preview instantly, then download the exact SVG card.</h1>
+          <p class="eyebrow">실시간 스튜디오</p>
+          <h1>실시간으로 만들고, 바로 SVG로 저장하세요</h1>
           <p class="hero-text">
-            Choose a card version, enter any solved.ac handle, and render the card directly in the browser.
+            solved.ac 핸들을 넣으면 README 카드 미리보기, API 주소 복사, SVG 다운로드까지 한 번에 처리할 수 있습니다.
           </p>
-          <p class="hero-text hero-text-ko">
-            `streak=true` can add a `Max Streak` row and a compact recent 1-year grass section below it.
-          </p>
+          <div class="hero-tags">
+            <span class="hero-tag">solved.ac</span>
+            <span class="hero-tag">깃허브 README</span>
+            <span class="hero-tag">v1 / v2</span>
+            <span class="hero-tag">연속 풀이 옵션</span>
+          </div>
         </div>
-        <a
-          class="hero-link"
-          href="https://github.com/kookjd7759/solvedac-readme-stats"
-          target="_blank"
-          rel="noreferrer"
-        >
-          GitHub Repository
-        </a>
+
+        <aside class="hero-side">
+          <div class="hero-note">
+            <p class="hero-note-label">빠른 흐름</p>
+            <div class="hero-steps">
+              <span>핸들 입력</span>
+              <span>미리보기</span>
+              <span>복사 또는 저장</span>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <a class="hero-link hero-link-accent" href="./platinum-snapshot/index.html">플래티넘 아카이브</a>
+            <a
+              class="hero-link"
+              href="https://github.com/kookjd7759/solvedac-readme-stats"
+              target="_blank"
+              rel="noreferrer"
+            >
+              GitHub 저장소
+            </a>
+          </div>
+        </aside>
       </section>
 
       <section class="studio-grid">
         <aside class="control-card">
           <div class="section-head">
             <div>
-              <h2>Card Controls</h2>
-              <p>Pick a version, enter a handle, then press OK.</p>
+              <h2>카드 설정</h2>
+              <p>핸들을 넣고 바로 결과를 확인하세요.</p>
             </div>
-            <span class="status-pill" id="status-pill">idle</span>
+            <span class="status-pill" id="status-pill">대기</span>
           </div>
 
           <div class="field-group">
-            <label for="handle-input">solved.ac handle</label>
+            <label for="handle-input">solved.ac 핸들</label>
             <input
               id="handle-input"
               type="text"
               value=""
-              placeholder="your-solved-handle"
+              placeholder="예: koosaga"
               autocomplete="off"
             />
+            <div class="example-row">
+              <button type="button" class="example-chip" data-handle-example="koosaga">koosaga</button>
+              <button type="button" class="example-chip" data-handle-example="utilforever">utilforever</button>
+              <button type="button" class="example-chip" data-handle-example="kookjd7759">kookjd7759</button>
+            </div>
           </div>
 
           <div class="field-group">
-            <span class="group-label">version</span>
+            <span class="group-label">카드 버전</span>
             <div class="version-grid">
               <label class="version-card">
                 <input type="radio" name="version" value="1" />
                 <span class="version-title">v1</span>
-                <span class="version-note">Classic layout</span>
+                <span class="version-note">클래식 카드</span>
               </label>
               <label class="version-card version-card-active">
                 <input type="radio" name="version" value="2" checked />
                 <span class="version-title">v2</span>
-                <span class="version-note">Minimal layout</span>
+                <span class="version-note">미니멀 카드</span>
               </label>
             </div>
           </div>
 
           <label class="toggle-card" for="streak-input">
             <input id="streak-input" type="checkbox" />
-            <span>Streak</span>
+            <span>연속 풀이 섹션 포함</span>
           </label>
 
           <div class="button-row">
-            <button type="button" id="render-button" class="primary-button">OK</button>
+            <button type="button" id="render-button" class="primary-button">미리보기</button>
             <button type="button" id="download-button" class="secondary-button" disabled>
-              Download SVG
+              SVG 다운로드
             </button>
           </div>
 
-          <div class="info-card">
-            <p class="info-label">api url</p>
-            <code id="api-url">Enter a handle to generate the API URL.</code>
+          <div class="output-grid">
+            <div class="info-card">
+              <div class="info-head">
+                <p class="info-label">API 주소</p>
+                <button type="button" class="tiny-button" id="copy-url-button" disabled>복사</button>
+              </div>
+              <code id="api-url">핸들을 입력하면 주소가 생성됩니다.</code>
+            </div>
+
+            <div class="info-card">
+              <div class="info-head">
+                <p class="info-label">README 코드</p>
+                <button type="button" class="tiny-button" id="copy-markdown-button" disabled>
+                  복사
+                </button>
+              </div>
+              <code id="markdown-snippet">이미지 마크다운을 바로 복사할 수 있습니다.</code>
+            </div>
           </div>
 
           <div class="message-card" id="message-card">
-            Enter your solved.ac handle to render a card preview.
+            solved.ac 핸들을 입력하면 카드 미리보기를 만들 수 있습니다.
           </div>
         </aside>
 
         <section class="preview-card">
           <div class="section-head">
             <div>
-              <h2>Preview</h2>
-              <p>The rendered card appears on the right.</p>
+              <h2>미리보기</h2>
+              <p id="preview-summary">아직 렌더링한 카드가 없습니다.</p>
             </div>
             <a
               id="open-svg-link"
@@ -104,21 +141,21 @@
               href="#"
               aria-disabled="true"
             >
-              Open SVG
+              새 탭에서 열기
             </a>
           </div>
 
           <div class="preview-stage">
             <div class="preview-empty" id="preview-empty">
-              <p class="preview-empty-title">No preview yet</p>
+              <p class="preview-empty-title">카드를 만들어 보세요</p>
               <p class="preview-empty-copy">
-                Enter a handle and press OK to render the card.
+                핸들을 입력하고 <strong>미리보기</strong>를 누르면 바로 결과가 나타납니다.
               </p>
             </div>
             <img
               id="preview-image"
               class="preview-image"
-              alt="solved.ac card preview"
+              alt="solved.ac 카드 미리보기"
               hidden
             />
           </div>

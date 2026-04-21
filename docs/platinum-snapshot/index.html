@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>백준 플래티넘 V 이상 기록 보관소</title>
+    <meta
+      name="description"
+      content="2026-04-21 09:00 KST 기준 백준 플래티넘 V 이상 저장본으로 독립형 SVG를 만들고, 랭크별 기록을 감성적으로 둘러볼 수 있는 아카이브 스튜디오입니다."
+    />
+    <link rel="stylesheet" href="./snapshot.css" />
+  </head>
+  <body>
+    <main class="archive-shell">
+      <section class="archive-hero">
+        <div class="archive-copy">
+          <p class="archive-eyebrow">백준 기록 보관소</p>
+          <h1>백준 플래티넘 V 이상 기록 보관소</h1>
+          <p class="archive-lead">
+            <strong>2026-04-21 09:00 KST</strong>에 고정 저장한
+            <strong>백준 플래티넘 V 이상</strong> 유저 데이터를 바탕으로,
+            시간이 지나도 같은 기록을 다시 꺼내 볼 수 있도록 만든 아카이브 스튜디오입니다.
+          </p>
+
+          <div class="archive-ribbon-row">
+            <span class="archive-ribbon">백준 / BOJ</span>
+            <span class="archive-ribbon">플래티넘 V 이상만 보존</span>
+            <span class="archive-ribbon">실시간 요청 없이 SVG 생성</span>
+          </div>
+
+          <div class="archive-stat-grid">
+            <article class="archive-stat-card">
+              <span class="archive-stat-label">보존된 사용자</span>
+              <strong class="archive-stat-value" id="snapshot-user-count">불러오는 중</strong>
+              <span class="archive-stat-note">플래티넘 V 이상 저장본</span>
+            </article>
+
+            <article class="archive-stat-card">
+              <span class="archive-stat-label">저장 시점</span>
+              <strong class="archive-stat-value archive-stat-value-small" id="snapshot-time-label">
+                2026-04-21 09:00 KST
+              </strong>
+              <span class="archive-stat-note">기록이 고정된 순간</span>
+            </article>
+
+            <article class="archive-stat-card archive-stat-card-spotlight">
+              <span class="archive-stat-label">아카이브 최상단</span>
+              <strong class="archive-stat-value" id="top-rank-handle">-</strong>
+              <span class="archive-stat-note" id="top-rank-copy">랭크 정보 준비 중</span>
+            </article>
+          </div>
+        </div>
+
+        <aside class="memory-card">
+          <p class="memory-label">보존 이유</p>
+          <p class="memory-body">
+            실시간 solved.ac / BOJ 요청이 어려워진 뒤에도, 저장해 둔 스냅샷만으로
+            기록을 다시 펼쳐 보고 SVG 카드까지 만들 수 있도록 남겨 둔 페이지입니다.
+          </p>
+
+          <blockquote class="memory-quote">
+            어느 시점의 랭크와 풀이 수, 그리고 그때의 분위기까지 함께 보존하는 작은 열람실.
+          </blockquote>
+
+          <div class="memory-divider"></div>
+
+          <div class="memory-actions">
+            <a class="memory-button" href="../index.html">실시간 스튜디오</a>
+            <a
+              class="memory-button memory-button-alt"
+              href="https://github.com/kookjd7759/solvedac-readme-stats"
+              target="_blank"
+              rel="noreferrer"
+            >
+              GitHub 저장소
+            </a>
+          </div>
+        </aside>
+      </section>
+
+      <section class="archive-stage">
+        <div class="archive-main-grid">
+          <aside class="archive-panel archive-panel-controls">
+            <div class="panel-head">
+              <div>
+                <p class="panel-kicker">아카이브 스튜디오</p>
+                <h2>저장된 카드 만들기</h2>
+                <p class="panel-copy">핸들을 입력하거나 아래 순위 보관소에서 바로 골라 미리볼 수 있습니다.</p>
+              </div>
+              <span class="status-pill" id="status-pill">불러오는 중</span>
+            </div>
+
+            <div class="field-block">
+              <label for="handle-input">저장된 핸들</label>
+              <input
+                id="handle-input"
+                type="text"
+                value=""
+                placeholder="예: koosaga"
+                autocomplete="off"
+              />
+              <div class="example-row">
+                <button type="button" class="example-chip" data-handle-example="koosaga">koosaga</button>
+                <button type="button" class="example-chip" data-handle-example="utilforever">utilforever</button>
+                <button type="button" class="example-chip" data-handle-example="xiaowuc1">xiaowuc1</button>
+              </div>
+            </div>
+
+            <div class="field-block">
+              <span class="group-label">카드 버전</span>
+              <div class="version-grid">
+                <label class="version-card">
+                  <input type="radio" name="version" value="1" />
+                  <span class="version-title">v1</span>
+                  <span class="version-note">클래식 보관 카드</span>
+                </label>
+                <label class="version-card version-card-active">
+                  <input type="radio" name="version" value="2" checked />
+                  <span class="version-title">v2</span>
+                  <span class="version-note">미니멀 보관 카드</span>
+                </label>
+              </div>
+            </div>
+
+            <label class="toggle-card" for="streak-input">
+              <input id="streak-input" type="checkbox" />
+              <span>연속 풀이 섹션 포함</span>
+            </label>
+
+            <div class="button-row">
+              <button type="button" id="render-button" class="primary-button">아카이브 미리보기</button>
+              <button type="button" id="download-button" class="secondary-button" disabled>
+                SVG 다운로드
+              </button>
+            </div>
+
+            <div class="snapshot-facts">
+              <div class="fact-card">
+                <p class="fact-label">저장본 정보</p>
+                <code id="data-source">플래티넘 아카이브를 불러오는 중입니다.</code>
+              </div>
+              <div class="fact-card">
+                <p class="fact-label">범위</p>
+                <p class="fact-copy">백준 플래티넘 V 이상 사용자만 이 페이지에서 렌더링할 수 있습니다.</p>
+              </div>
+            </div>
+
+            <div class="message-card" id="message-card">
+              저장된 아카이브를 불러오는 중입니다.
+            </div>
+          </aside>
+
+          <section class="archive-panel archive-panel-preview">
+            <div class="panel-head">
+              <div>
+                <p class="panel-kicker">미리보기</p>
+                <h2>아카이브 카드 미리보기</h2>
+                <p class="preview-summary" id="preview-summary">아직 불러온 카드가 없습니다.</p>
+              </div>
+              <a
+                id="open-svg-link"
+                class="open-link"
+                href="#"
+                aria-disabled="true"
+              >
+                SVG 열기
+              </a>
+            </div>
+
+            <div class="preview-stage">
+              <div class="preview-empty" id="preview-empty">
+                <p class="preview-empty-title">기록을 꺼내 보세요</p>
+                <p class="preview-empty-copy">
+                  저장된 플래티넘 V 이상 핸들을 입력하거나 아래 순위 보관소에서 유저를 선택하면,
+                  그 시점의 카드를 다시 만들 수 있습니다.
+                </p>
+              </div>
+              <div id="preview-canvas" class="preview-canvas" hidden></div>
+            </div>
+
+            <div class="preview-caption">
+              다운로드되는 파일은 고정 저장본을 바탕으로 브라우저 안에서 조합한 독립형 SVG입니다.
+            </div>
+          </section>
+        </div>
+
+        <section class="ranking-gallery">
+          <div class="ranking-head">
+            <div>
+              <p class="panel-kicker">순위 보관소</p>
+              <h2>랭크별로 이어 보는 아카이브</h2>
+              <p class="ranking-summary" id="ranking-summary">저장본 순위를 정리하는 중입니다.</p>
+            </div>
+
+            <div class="ranking-tools">
+              <label class="ranking-search">
+                <span class="ranking-search-label">핸들 또는 순위 찾기</span>
+                <input
+                  id="ranking-filter-input"
+                  type="text"
+                  placeholder="예: koosaga 또는 #100"
+                  autocomplete="off"
+                />
+              </label>
+
+              <div class="ranking-shortcuts" aria-label="순위 빠른 이동">
+                <button type="button" class="ranking-chip is-active" data-ranking-band="all">전체</button>
+                <button type="button" class="ranking-chip" data-ranking-band="10">Top 10</button>
+                <button type="button" class="ranking-chip" data-ranking-band="30">Top 30</button>
+                <button type="button" class="ranking-chip" data-ranking-band="100">Top 100</button>
+                <button type="button" class="ranking-chip" data-ranking-band="300">Top 300</button>
+                <button type="button" class="ranking-chip" data-ranking-band="1000">Top 1000</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ranking-panels">
+            <article class="ranking-info-card" id="ranking-focus-card">
+              <p class="ranking-info-label">현재 선택</p>
+              <strong class="ranking-info-title" id="ranking-focus-title">아직 선택한 카드가 없습니다</strong>
+              <p class="ranking-info-copy" id="ranking-focus-copy">
+                순위 목록에서 유저를 누르면 카드 미리보기와 함께 이 자리도 갱신됩니다.
+              </p>
+            </article>
+
+            <article class="ranking-info-card ranking-info-card-accent">
+              <p class="ranking-info-label">보관 범위</p>
+              <strong class="ranking-info-title">백준 플래티넘 V 이상만 보존</strong>
+              <p class="ranking-info-copy">
+                2026-04-21 09:00 KST 스냅샷만 사용하며, 현재 순위 순서대로 차분하게 열람할 수 있습니다.
+              </p>
+            </article>
+          </div>
+
+          <div class="ranking-featured" id="ranking-featured"></div>
+
+          <div class="ranking-board">
+            <div class="ranking-board-head">
+              <span>순위</span>
+              <span>유저</span>
+              <span>클래스</span>
+              <span>푼 문제</span>
+              <span>최대 연속</span>
+              <span>선택</span>
+            </div>
+
+            <div class="ranking-list" id="ranking-list"></div>
+
+            <div class="ranking-board-footer">
+              <button type="button" id="ranking-more-button" class="ranking-more-button" hidden>
+                더 보기
+              </button>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./tier_data.js"></script>
+    <script src="./class_data.js"></script>
+    <script src="./user_data.js"></script>
+    <script src="./app.js" defer></script>
+  </body>
+</html>
