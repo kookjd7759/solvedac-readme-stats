@@ -9,8 +9,6 @@
   <a href="https://kookjd7759.github.io/solvedac-readme-stats/">실시간 웹 스튜디오</a>
   ·
   <a href="https://kookjd7759.github.io/solvedac-readme-stats/platinum-snapshot/">플래티넘 기록 보관소</a>
-  ·
-  <a href="https://solvedac-readme-stats.vercel.app/api">Vercel API</a>
 </p>
 
 <img width="100%" align="center" alt="top" src="https://github.com/user-attachments/assets/785e8cb0-113b-4933-8f16-d563a2205129" />
