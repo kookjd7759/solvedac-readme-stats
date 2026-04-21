@@ -1,189 +1,131 @@
 # solvedac-readme-stats
 
-![Status](https://img.shields.io/badge/status-early%20access-orange)
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Next.js](https://img.shields.io/badge/Next.js-16-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178C6)
+GitHub README에 바로 넣을 수 있는 `solved.ac` 프로필 SVG 카드를 만드는 프로젝트입니다.  
+실시간 카드 생성기와, 백준 플래티넘 V 이상 저장본만으로 동작하는 아카이브 생성기를 함께 제공합니다.
 
-> Dynamic SVG solved.ac stat cards for GitHub README profiles.  
-> GitHub README profile can use these dynamic solved.ac SVG cards directly.
->
-> GitHub README 프로필에 바로 붙일 수 있는 solved.ac 동적 SVG 카드 프로젝트입니다.  
-> solved.ac 공개 프로필 데이터를 가져와 카드 이미지로 렌더링합니다.
+## 바로가기
 
-## A Small Keepsake
+- 실시간 웹 스튜디오: [https://kookjd7759.github.io/solvedac-readme-stats/](https://kookjd7759.github.io/solvedac-readme-stats/)
+- 플래티넘 아카이브 스튜디오: [https://kookjd7759.github.io/solvedac-readme-stats/platinum-snapshot/](https://kookjd7759.github.io/solvedac-readme-stats/platinum-snapshot/)
+- API 기본 주소: `https://solvedac-readme-stats.vercel.app/api`
 
-This project started as a README stats card generator, and now also works as a small keepsake card maker.
-If you want, you can turn on `streak=true` to add a `Max Streak` row and a compact recent 1-year grass section below it.
+## 무엇을 할 수 있나요?
 
-원래는 README stats 용도로 만들던 프로젝트였고, 지금은 기록을 남기는 작은 카드 메이커로도 쓸 수 있게 정리했습니다.
-필요하면 `streak=true` 옵션으로 `Max Streak` 행과 최근 1년 잔디 섹션도 함께 넣을 수 있습니다.
+- `solved.ac` 핸들만 넣고 카드 미리보기를 바로 확인할 수 있습니다.
+- `v1`, `v2` 두 가지 카드 버전을 지원합니다.
+- `streak=true` 옵션으로 최대 연속 풀이와 최근 1년 잔디 섹션을 추가할 수 있습니다.
+- 웹 스튜디오에서 API 주소와 README용 마크다운을 바로 복사할 수 있습니다.
+- 플래티넘 아카이브 스튜디오는 `2026-04-21 09:00 KST` 기준 백준 플래티넘 V 이상 저장본만으로 독립형 SVG를 만듭니다.
 
-## Web Studio
-
-<p align="center">
-  <a href="https://kookjd7759.github.io/solvedac-readme-stats/">
-    <img alt="Open Web Studio" src="https://img.shields.io/badge/Open-Web%20Studio-0f172a?style=for-the-badge&logo=githubpages&logoColor=white" />
-  </a>
-</p>
-
-Open the web studio here: [https://kookjd7759.github.io/solvedac-readme-stats/](https://kookjd7759.github.io/solvedac-readme-stats/)
-
-Choose `v1` or `v2`, enter any solved.ac handle, preview the rendered card in the browser, and download the exact SVG.  
-Enable `streak=true` in the studio if you want the `Max Streak` row and the recent 1-year grass panel.
-
-`v1`, `v2` 중 하나를 고르고 solved.ac handle을 입력하면 브라우저에서 바로 미리보기를 확인하고 SVG를 그대로 내려받을 수 있습니다.  
-웹 스튜디오에서 `streak=true`를 켜면 `Max Streak` 행과 최근 1년 잔디 패널이 추가됩니다.
-
-## Preview
-
-`streak=true` adds a `Max Streak` row and a compact recent 1-year grass section.
-
-`streak=true`를 쓰면 `Max Streak` 행과 최근 1년 잔디 섹션이 추가됩니다.
+## 카드 예시
 
 <table>
   <tr>
-    <td align="center" width="50%">
-      <strong>v=1, streak=false</strong>
-    </td>
-    <td align="center" width="50%">
-      <strong>v=1, streak=true</strong>
-    </td>
+    <td align="center" width="50%"><strong>v1 / streak 없음</strong></td>
+    <td align="center" width="50%"><strong>v1 / streak 포함</strong></td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <a href="https://solved.ac/en/profile/kookjd7759">
-        <img src="https://github.com/kookjd7759/solvedac-readme-stats/blob/main/svg/solvedac-kookjd7759-v1.svg" alt="solved.ac stats v1 without streak" />
-      </a>
+      <img src="https://github.com/kookjd7759/solvedac-readme-stats/blob/main/svg/solvedac-kookjd7759-v1.svg" alt="v1 카드 예시" />
     </td>
     <td align="center" width="50%">
-      <a href="https://solved.ac/en/profile/kookjd7759">
-        <img src="https://github.com/kookjd7759/solvedac-readme-stats/blob/main/svg/solvedac-kookjd7759-v1_streak.svg" alt="solved.ac stats v1 with streak" />
-      </a>
+      <img src="https://github.com/kookjd7759/solvedac-readme-stats/blob/main/svg/solvedac-kookjd7759-v1_streak.svg" alt="v1 streak 카드 예시" />
     </td>
   </tr>
   <tr>
-    <td align="center" width="50%">
-      <strong>v=2, streak=false</strong>
-    </td>
-    <td align="center" width="50%">
-      <strong>v=2, streak=true</strong>
-    </td>
+    <td align="center" width="50%"><strong>v2 / streak 없음</strong></td>
+    <td align="center" width="50%"><strong>v2 / streak 포함</strong></td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <a href="https://solved.ac/en/profile/kookjd7759">
-        <img src="https://github.com/kookjd7759/solvedac-readme-stats/blob/main/svg/solvedac-kookjd7759-v2.svg" alt="solved.ac stats v2 without streak" />
-      </a>
+      <img src="https://github.com/kookjd7759/solvedac-readme-stats/blob/main/svg/solvedac-kookjd7759-v2.svg" alt="v2 카드 예시" />
     </td>
     <td align="center" width="50%">
-      <a href="https://solved.ac/en/profile/kookjd7759">
-        <img src="https://github.com/kookjd7759/solvedac-readme-stats/blob/main/svg/solvedac-kookjd7759-v2_streak.svg" alt="solved.ac stats v2 with streak" />
-      </a>
+      <img src="https://github.com/kookjd7759/solvedac-readme-stats/blob/main/svg/solvedac-kookjd7759-v2_streak.svg" alt="v2 streak 카드 예시" />
     </td>
   </tr>
 </table>
 
-## Usage
+## 기본 사용법
 
-Replace `{username}` with your solved.ac handle.
-
-`{username}` 자리에 본인의 solved.ac handle을 넣어서 사용하세요.
+README에 가장 간단하게 넣으려면 아래처럼 사용하면 됩니다.
 
 ```markdown
-[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://github.com/kookjd7759/solvedac-readme-stats)
+![solved.ac 카드](https://solvedac-readme-stats.vercel.app/api?handle={handle})
 ```
 
-## Card Versions
-
-### v1
-
-Classic card layout.  
-If you omit the version parameter, `v=1` is used by default.
-
-기본 카드 레이아웃입니다.  
-버전 파라미터를 생략하면 기본값으로 `v=1`이 사용됩니다.
+버전을 지정하고 싶다면:
 
 ```markdown
-[![solved.ac stats](https://solvedac-readme-stats.vercel.app/api?handle={username})](https://github.com/kookjd7759/solvedac-readme-stats)
+![solved.ac 카드](https://solvedac-readme-stats.vercel.app/api?handle={handle}&v=2)
 ```
 
-### v2
-
-Minimal border layout with the solved background area applied to the top section.  
-If you add `streak=true`, the card also renders a `Max Streak` row and a compact recent 1-year grass section.
-
-상단 배경 영역이 적용된 미니멀 보더 레이아웃입니다.  
-`streak=true`를 추가하면 `Max Streak` 행과 최근 1년 잔디 섹션도 함께 렌더링됩니다.
+연속 풀이 섹션까지 포함하고 싶다면:
 
 ```markdown
-[![solved.ac stats v2](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2)](https://github.com/kookjd7759/solvedac-readme-stats)
+![solved.ac 카드](https://solvedac-readme-stats.vercel.app/api?handle={handle}&v=2&streak=true)
 ```
 
-Streak-enabled example:
+## 쿼리 파라미터
 
-```markdown
-[![solved.ac stats v2 streak](https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2&streak=true)](https://github.com/kookjd7759/solvedac-readme-stats)
-```
+- `handle`: solved.ac 핸들
+- `v`: 카드 버전, `1` 또는 `2`
+- `streak`: `true`이면 최대 연속 풀이와 최근 1년 잔디 섹션을 추가
+- `download`: `1`, `true`, `yes` 중 하나면 SVG를 첨부 파일로 응답
+- `debug`: `1`, `true`, `json` 중 하나면 디버그 JSON 응답
 
-## Example URLs
+## 웹 스튜디오
 
-Ready-to-test example URLs.
+GitHub Pages의 실시간 웹 스튜디오는 배포된 Vercel API를 호출해 카드를 미리보고 SVG를 저장하는 용도입니다.
 
-- `v=1`: `https://solvedac-readme-stats.vercel.app/api?handle={username}&v=1`
-- `v=2`: `https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2`
-- `v=2 + streak=true`: `https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2&streak=true`
-  This adds the `Max Streak` row and recent 1-year grass section.
-- `v=2 + streak=false`: `https://solvedac-readme-stats.vercel.app/api?handle={username}&v=2&streak=false`
-  This keeps the basic card without the streak section.
+- 핸들 입력
+- 카드 버전 선택
+- `streak` 옵션 토글
+- 미리보기 확인
+- API 주소 복사 / README 코드 복사 / SVG 다운로드
 
-## Query Parameters
+## 플래티넘 아카이브 스튜디오
 
-Available query parameters.
+플래티넘 아카이브 스튜디오는 실시간 프로필 요청이 어려워진 이후를 대비한 페이지입니다.
 
-- `handle`: solved.ac handle
-- `v`: card version (`1` or `2`)
-- `streak`: use `true` to add the `Max Streak` row and recent 1-year grass panel, or `false` to keep the basic card
-- `download`: return the SVG as an attachment when set to `1`, `true`, or `yes`
-- `debug`: return JSON debug output with `1`, `true`, or `json`
+- 기준 시점: `2026-04-21 09:00 KST`
+- 대상 범위: **백준 플래티넘 V 이상**
+- 동작 방식: 저장된 JSON과 저장된 이미지 자산을 이용해 브라우저 안에서 독립형 SVG 생성
+- 특징: solved.ac / BOJ 라이브 프로필 API를 직접 호출하지 않음
 
-## GitHub Pages
+## GitHub Pages 구성
 
-This repository includes a static GitHub Pages app in [`docs/`](./docs) and a deployment workflow in [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml).
+- 메인 Pages 앱: [`docs/`](./docs)
+- 플래티넘 아카이브 앱: [`docs/platinum-snapshot/`](./docs/platinum-snapshot)
+- Pages 배포 워크플로: [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml)
 
-The Pages app uses the deployed Vercel API to render cards and download the exact SVG response.
+## 직접 배포하기
 
-## Deploy Your Own
+1. 이 저장소를 포크합니다.
+2. Next.js 앱을 Vercel에 배포합니다.
+3. GitHub Pages를 GitHub Actions 기반으로 활성화합니다.
+4. 필요하면 자신의 `/api` 주소를 기준으로 웹 스튜디오를 연결합니다.
 
-Fork this repository and deploy the API to Vercel.
+## 개발
 
-1. Fork this repository.
-2. Deploy the Next.js app to Vercel.
-3. Enable GitHub Pages with GitHub Actions for the web studio.
-4. Use your own deployed `/api` endpoint if you want a separate API base.
-
-## Development
-
-Run the development server.
+개발 서버 실행:
 
 ```bash
 npm run dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000).
-
-Example local test URLs:
+실행 후 확인할 주소:
 
 - `http://localhost:3000/`
-- `http://localhost:3000/api?handle={username}&v=1`
-- `http://localhost:3000/api?handle={username}&v=2`
-- `http://localhost:3000/api?handle={username}&v=2&streak=true`
+- `http://localhost:3000/api?handle={handle}&v=1`
+- `http://localhost:3000/api?handle={handle}&v=2`
+- `http://localhost:3000/api?handle={handle}&v=2&streak=true`
 
-## About solved.ac
+## solved.ac / 백준
 
-solved.ac is a competitive programming profile service built around Baekjoon Online Judge (BOJ).  
-This project uses solved.ac public profile data to generate dynamic README cards.
+`solved.ac`는 백준 온라인 저지(BOJ) 기록을 바탕으로 한 프로필 서비스입니다.  
+이 프로젝트는 공개 프로필 데이터를 이용해 GitHub README용 동적 카드를 생성합니다.
 
-## License
+## 라이선스
 
-Distributed under the MIT License. See `LICENSE` for more information.
+MIT License를 따릅니다. 자세한 내용은 [`LICENSE`](./LICENSE)를 확인해 주세요.

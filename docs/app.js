@@ -1,4 +1,10 @@
 const API_BASE = "https://solvedac-readme-stats.vercel.app/api";
+const STATUS_LABELS = {
+  idle: "대기",
+  loading: "불러오는 중",
+  preview: "미리보기",
+  error: "오류",
+};
 
 const elements = {
   handleInput: document.querySelector("#handle-input"),
@@ -9,9 +15,14 @@ const elements = {
   statusPill: document.querySelector("#status-pill"),
   messageCard: document.querySelector("#message-card"),
   apiUrl: document.querySelector("#api-url"),
+  markdownSnippet: document.querySelector("#markdown-snippet"),
   openSvgLink: document.querySelector("#open-svg-link"),
   streakInput: document.querySelector("#streak-input"),
   versionCards: Array.from(document.querySelectorAll(".version-card")),
+  exampleButtons: Array.from(document.querySelectorAll("[data-handle-example]")),
+  copyUrlButton: document.querySelector("#copy-url-button"),
+  copyMarkdownButton: document.querySelector("#copy-markdown-button"),
+  previewSummary: document.querySelector("#preview-summary"),
 };
 
 const state = {
@@ -35,13 +46,23 @@ function boot() {
       state.draftVersion = input.value;
       input.checked = true;
       syncVersionCards();
-      syncApiUrl();
+      syncOutputPanels();
+    });
+  });
+
+  elements.exampleButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const example = button.getAttribute("data-handle-example") || "";
+      state.draftHandle = example;
+      elements.handleInput.value = example;
+      syncOutputPanels();
+      elements.handleInput.focus();
     });
   });
 
   elements.handleInput.addEventListener("input", () => {
     state.draftHandle = elements.handleInput.value.trim();
-    syncApiUrl();
+    syncOutputPanels();
   });
 
   elements.handleInput.addEventListener("keydown", (event) => {
@@ -53,33 +74,32 @@ function boot() {
 
   elements.streakInput.addEventListener("change", () => {
     state.draftShowStreak = elements.streakInput.checked;
-    syncApiUrl();
+    syncOutputPanels();
   });
 
   elements.previewImage.addEventListener("load", () => {
     elements.downloadButton.disabled = false;
-    setStatus("ready");
-    setMessage(
-      "Preview updated. Download SVG saves the exact card you see on screen. / 미리보기가 갱신되었습니다. Download SVG는 지금 화면에 보이는 카드를 그대로 저장합니다.",
-      false
-    );
+    setStatus("preview");
+    setMessage("카드 미리보기가 준비되었습니다. 지금 보이는 상태 그대로 SVG로 저장할 수 있습니다.", false);
   });
 
   elements.previewImage.addEventListener("error", () => {
     elements.downloadButton.disabled = true;
     hidePreview();
     setStatus("error");
-    setMessage(
-      "The preview image could not be loaded. Check the handle and try again. / 미리보기 이미지를 불러오지 못했습니다. handle을 확인하고 다시 시도해 주세요.",
-      true
-    );
+    setMessage("카드 이미지를 불러오지 못했습니다. 핸들과 옵션을 다시 확인해 주세요.", true);
   });
 
   elements.renderButton.addEventListener("click", renderCard);
   elements.downloadButton.addEventListener("click", downloadSvg);
+  elements.copyUrlButton.addEventListener("click", () => copyOutput(elements.apiUrl.textContent, "API 주소를 복사했습니다."));
+  elements.copyMarkdownButton.addEventListener("click", () =>
+    copyOutput(elements.markdownSnippet.textContent, "README 코드를 복사했습니다.")
+  );
 
   syncVersionCards();
-  syncApiUrl();
+  syncOutputPanels();
+  setStatus("idle");
 }
 
 function syncVersionCards() {
@@ -97,12 +117,11 @@ function buildApiUrl(handle, version, options = {}) {
 
   url.searchParams.set("handle", handle);
   url.searchParams.set("v", version);
+  url.searchParams.set("streak", streak ? "true" : "false");
 
   if (download) {
     url.searchParams.set("download", "1");
   }
-
-  url.searchParams.set("streak", streak ? "true" : "false");
 
   if (cacheBust) {
     url.searchParams.set("_preview", Date.now().toString());
@@ -111,29 +130,62 @@ function buildApiUrl(handle, version, options = {}) {
   return url.toString();
 }
 
+function buildMarkdownSnippet(handle, version, streak) {
+  const apiUrl = buildApiUrl(handle, version, { streak });
+  if (!apiUrl) {
+    return "이미지 마크다운을 바로 복사할 수 있습니다.";
+  }
+
+  return `![solved.ac 카드](${apiUrl})`;
+}
+
+function buildPreviewSummary(handle, version, streak) {
+  if (!handle) {
+    return "아직 렌더링한 카드가 없습니다.";
+  }
+
+  return `${handle} · v${version}${streak ? " · 연속 풀이 포함" : ""}`;
+}
+
 function buildDownloadFilename() {
   const safeHandle = (state.submittedHandle || "card")
     .trim()
     .replace(/[^a-z0-9_-]+/gi, "-")
     .replace(/^-+|-+$/g, "") || "card";
+  const streakSuffix = state.submittedShowStreak ? "-streak" : "";
 
-  return `solvedac-${safeHandle}-v${state.submittedVersion}.svg`;
+  return `solvedac-${safeHandle}-v${state.submittedVersion}${streakSuffix}.svg`;
 }
 
-function syncApiUrl() {
-  const nextUrl = buildApiUrl(state.draftHandle, state.draftVersion, {
+function syncOutputPanels() {
+  const apiUrl = buildApiUrl(state.draftHandle, state.draftVersion, {
     streak: state.draftShowStreak,
   });
+  const markdownSnippet = buildMarkdownSnippet(
+    state.draftHandle,
+    state.draftVersion,
+    state.draftShowStreak
+  );
 
-  if (!nextUrl) {
-    elements.apiUrl.textContent = "Enter a handle to generate the API URL.";
+  elements.apiUrl.textContent = apiUrl || "핸들을 입력하면 주소가 생성됩니다.";
+  elements.markdownSnippet.textContent = markdownSnippet;
+  elements.previewSummary.textContent = buildPreviewSummary(
+    state.submittedHandle,
+    state.submittedVersion,
+    state.submittedShowStreak
+  );
+
+  const canCopy = Boolean(apiUrl);
+  elements.copyUrlButton.disabled = !canCopy;
+  elements.copyMarkdownButton.disabled = !canCopy;
+
+  if (!apiUrl) {
     elements.openSvgLink.href = "#";
     elements.openSvgLink.setAttribute("aria-disabled", "true");
     return;
   }
 
-  elements.apiUrl.textContent = nextUrl;
-  elements.openSvgLink.href = nextUrl;
+  elements.openSvgLink.href = apiUrl;
   elements.openSvgLink.removeAttribute("aria-disabled");
 }
 
@@ -143,10 +195,7 @@ function renderCard() {
     elements.downloadButton.disabled = true;
     hidePreview();
     setStatus("error");
-    setMessage(
-      "Please enter a solved.ac handle. / solved.ac handle을 입력해 주세요.",
-      true
-    );
+    setMessage("solved.ac 핸들을 먼저 입력해 주세요.", true);
     return;
   }
 
@@ -160,13 +209,9 @@ function renderCard() {
 
   elements.downloadButton.disabled = true;
   setStatus("loading");
-  setMessage(
-    "Preview is loading... / 미리보기를 불러오는 중입니다.",
-    false
-  );
-
+  setMessage("카드를 불러오는 중입니다...", false);
   showPreview(state.previewUrl);
-  syncApiUrl();
+  syncOutputPanels();
 }
 
 function showPreview(previewUrl) {
@@ -184,10 +229,7 @@ function hidePreview() {
 function downloadSvg() {
   if (!state.submittedHandle) {
     setStatus("error");
-    setMessage(
-      "Render a card before downloading. / 다운로드 전에 먼저 카드를 렌더링해 주세요.",
-      true
-    );
+    setMessage("카드를 먼저 렌더링한 뒤 다운로드해 주세요.", true);
     return;
   }
 
@@ -204,15 +246,47 @@ function downloadSvg() {
   link.click();
   link.remove();
 
-  setStatus("ready");
-  setMessage(
-    "SVG download started. / SVG 다운로드가 시작되었습니다.",
-    false
-  );
+  setStatus("preview");
+  setMessage("SVG 다운로드를 시작했습니다.", false);
+}
+
+async function copyOutput(text, successMessage) {
+  if (!text || text.includes("입력하면")) {
+    setStatus("error");
+    setMessage("복사할 내용이 아직 준비되지 않았습니다.", true);
+    return;
+  }
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      fallbackCopy(text);
+    }
+
+    setStatus("preview");
+    setMessage(successMessage, false);
+  } catch (error) {
+    fallbackCopy(text);
+    setStatus("preview");
+    setMessage(successMessage, false);
+  }
+}
+
+function fallbackCopy(text) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "true");
+  textarea.style.position = "absolute";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
 }
 
 function setStatus(status) {
-  elements.statusPill.textContent = status;
+  elements.statusPill.textContent = STATUS_LABELS[status] || status;
   elements.statusPill.dataset.status = status;
 }
 
