@@ -1,6 +1,12 @@
 # solvedac-readme-stats  
 
 <p align="center">
+  <img src="https://img.shields.io/badge/README-%EC%B9%B4%EB%93%9C_%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-7a4a22?style=for-the-badge" alt="README 카드 프로젝트" />
+  <img src="https://img.shields.io/badge/SVG-%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C_%EA%B0%80%EB%8A%A5-2f6d7a?style=for-the-badge" alt="SVG 다운로드 가능" />
+  <img src="https://img.shields.io/badge/BOJ-%ED%94%8C%EB%9E%98%ED%8B%B0%EB%84%98_V%2B_%EA%B8%B0%EB%A1%9D_%EB%B3%B4%EA%B4%80%EC%86%8C-3e4c59?style=for-the-badge" alt="BOJ 플래티넘 V+ 기록 보관소" />
+</p>
+
+<p align="center">
   GitHub README에 바로 넣을 수 있는 <code>solved.ac</code> 프로필 SVG 카드를 만들고,<br />
   실시간 생성기와 정적 기록 보관소까지 함께 제공하는 프로젝트입니다.
 </p>
