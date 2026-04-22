@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>백준 플래티넘 V 이상 기록 보관소</title>
+    <title>백준 기록 보관소</title>
     <meta
       name="description"
-      content="2026-04-21 09:00 KST 기준 백준 플래티넘 V 이상 저장본으로 독립형 SVG를 만들고, 랭크별 기록을 감성적으로 둘러볼 수 있는 아카이브 스튜디오입니다."
+      content="2026-04-21 09:00 KST 기준으로 저장한 백준 기록을 바탕으로 카드와 순위를 다시 펼쳐 보는 정적 아카이브입니다."
     />
     <link rel="stylesheet" href="./snapshot.css" />
   </head>
@@ -15,18 +15,11 @@
       <section class="archive-hero">
         <div class="archive-copy">
           <p class="archive-eyebrow">백준 기록 보관소</p>
-          <h1>백준 플래티넘 V 이상 기록 보관소</h1>
+          <h1>백준 기록 보관소</h1>
           <p class="archive-lead">
-            <strong>2026-04-21 09:00 KST</strong>에 고정 저장한
-            <strong>백준 플래티넘 V 이상</strong> 유저 데이터를 바탕으로,
-            시간이 지나도 같은 기록을 다시 꺼내 볼 수 있도록 만든 아카이브 스튜디오입니다.
+            <strong>2026-04-21 09:00 KST</strong> 기준으로 저장한 백준 기록을 바탕으로,
+            원하는 핸들의 카드를 다시 만들고 순위 흐름도 함께 둘러볼 수 있는 정적 보관 페이지입니다.
           </p>
-
-          <div class="archive-ribbon-row">
-            <span class="archive-ribbon">백준 / BOJ</span>
-            <span class="archive-ribbon">플래티넘 V 이상만 보존</span>
-            <span class="archive-ribbon">실시간 요청 없이 SVG 생성</span>
-          </div>
 
           <div class="archive-stat-grid">
             <article class="archive-stat-card">
@@ -40,42 +33,16 @@
               <strong class="archive-stat-value archive-stat-value-small" id="snapshot-time-label">
                 2026-04-21 09:00 KST
               </strong>
-              <span class="archive-stat-note">기록이 고정된 순간</span>
+              <span class="archive-stat-note">기록이 고정된 시간</span>
             </article>
 
             <article class="archive-stat-card archive-stat-card-spotlight">
-              <span class="archive-stat-label">아카이브 최상단</span>
+              <span class="archive-stat-label">아카이브 최상위</span>
               <strong class="archive-stat-value" id="top-rank-handle">-</strong>
-              <span class="archive-stat-note" id="top-rank-copy">랭크 정보 준비 중</span>
+              <span class="archive-stat-note" id="top-rank-copy">랭크 정보를 준비 중</span>
             </article>
           </div>
         </div>
-
-        <aside class="memory-card">
-          <p class="memory-label">보존 이유</p>
-          <p class="memory-body">
-            실시간 solved.ac / BOJ 요청이 어려워진 뒤에도, 저장해 둔 스냅샷만으로
-            기록을 다시 펼쳐 보고 SVG 카드까지 만들 수 있도록 남겨 둔 페이지입니다.
-          </p>
-
-          <blockquote class="memory-quote">
-            어느 시점의 랭크와 풀이 수, 그리고 그때의 분위기까지 함께 보존하는 작은 열람실.
-          </blockquote>
-
-          <div class="memory-divider"></div>
-
-          <div class="memory-actions">
-            <a class="memory-button" href="../index.html">실시간 스튜디오</a>
-            <a
-              class="memory-button memory-button-alt"
-              href="https://github.com/kookjd7759/solvedac-readme-stats"
-              target="_blank"
-              rel="noreferrer"
-            >
-              GitHub 저장소
-            </a>
-          </div>
-        </aside>
       </section>
 
       <section class="archive-stage">
@@ -84,7 +51,7 @@
             <div class="panel-head">
               <div>
                 <p class="panel-kicker">아카이브 스튜디오</p>
-                <h2>저장된 카드 만들기</h2>
+                <h2>카드 만들기</h2>
                 <p class="panel-copy">핸들을 입력하거나 아래 순위 보관소에서 바로 골라 미리볼 수 있습니다.</p>
               </div>
               <span class="status-pill" id="status-pill">불러오는 중</span>
@@ -124,7 +91,7 @@
 
             <label class="toggle-card" for="streak-input">
               <input id="streak-input" type="checkbox" />
-              <span>연속 풀이 섹션 포함</span>
+              <span>연속 잔디 섹션 포함</span>
             </label>
 
             <div class="button-row">
@@ -132,21 +99,6 @@
               <button type="button" id="download-button" class="secondary-button" disabled>
                 SVG 다운로드
               </button>
-            </div>
-
-            <div class="snapshot-facts">
-              <div class="fact-card">
-                <p class="fact-label">저장본 정보</p>
-                <code id="data-source">플래티넘 아카이브를 불러오는 중입니다.</code>
-              </div>
-              <div class="fact-card">
-                <p class="fact-label">범위</p>
-                <p class="fact-copy">백준 플래티넘 V 이상 사용자만 이 페이지에서 렌더링할 수 있습니다.</p>
-              </div>
-            </div>
-
-            <div class="message-card" id="message-card">
-              저장된 아카이브를 불러오는 중입니다.
             </div>
           </aside>
 
@@ -179,7 +131,7 @@
             </div>
 
             <div class="preview-caption">
-              다운로드되는 파일은 고정 저장본을 바탕으로 브라우저 안에서 조합한 독립형 SVG입니다.
+              다운로드되는 파일은 고정 저장본을 바탕으로 브라우저 안에서 조합한 완전한 SVG입니다.
             </div>
           </section>
         </div>
@@ -217,17 +169,17 @@
           <div class="ranking-panels">
             <article class="ranking-info-card" id="ranking-focus-card">
               <p class="ranking-info-label">현재 선택</p>
-              <strong class="ranking-info-title" id="ranking-focus-title">아직 선택한 카드가 없습니다</strong>
+              <strong class="ranking-info-title" id="ranking-focus-title">아직 선택된 카드가 없습니다</strong>
               <p class="ranking-info-copy" id="ranking-focus-copy">
                 순위 목록에서 유저를 누르면 카드 미리보기와 함께 이 자리도 갱신됩니다.
               </p>
             </article>
 
             <article class="ranking-info-card ranking-info-card-accent">
-              <p class="ranking-info-label">보관 범위</p>
-              <strong class="ranking-info-title">백준 플래티넘 V 이상만 보존</strong>
+              <p class="ranking-info-label">정렬 기준</p>
+              <strong class="ranking-info-title">저장 시점 순위 기준으로 열람</strong>
               <p class="ranking-info-copy">
-                2026-04-21 09:00 KST 스냅샷만 사용하며, 현재 순위 순서대로 차분하게 열람할 수 있습니다.
+                2026-04-21 09:00 KST 저장본만 사용하며, 당시 순위와 풀이 수 기준으로 차분하게 둘러볼 수 있습니다.
               </p>
             </article>
           </div>
@@ -238,7 +190,7 @@
             <div class="ranking-board-head">
               <span>순위</span>
               <span>유저</span>
-              <span>클래스</span>
+              <span>티어</span>
               <span>푼 문제</span>
               <span>최대 연속</span>
               <span>선택</span>
@@ -248,7 +200,7 @@
 
             <div class="ranking-board-footer">
               <button type="button" id="ranking-more-button" class="ranking-more-button" hidden>
-                더 보기
+                더보기
               </button>
             </div>
           </div>

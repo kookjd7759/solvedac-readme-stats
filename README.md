@@ -81,7 +81,11 @@ https://solvedac-readme-stats.vercel.app/api?handle={handle}&v=2&download=1
 - `v`: 카드 버전, `1` 또는 `2`
 - `streak`: `true`이면 연속 풀이 섹션 추가
 - `download`: `1`, `true`, `yes` 중 하나면 SVG 파일 다운로드 응답
+- `full`: `1`, `true`, `yes` 중 하나면 배경/아바타 같은 확장 자산까지 포함한 full SVG 응답
 - `debug`: `1`, `true`, `json` 중 하나면 디버그 JSON 응답
+
+기본 API 링크는 GitHub README 호환성을 위해 안전 모드로 응답합니다.  
+웹 스튜디오 미리보기와 다운로드는 내부적으로 `full=1`을 사용해 더 풍부한 자산까지 포함합니다.
 
 ## 3. 백준 플래티넘 V 이상 기록 보관소
 

@@ -59,6 +59,22 @@ function renderAssetToken(href: string, x: number, y: number, size: number) {
     `;
 }
 
+function renderAvatarFallback(handle: string, cx: number, cy: number, radius: number, accent: string) {
+    const label = esc((handle.trim().charAt(0) || '?').toUpperCase());
+    const fontSize = Math.max(18, Math.round(radius * 0.9));
+
+    return `
+      <g>
+        <circle cx="${cx}" cy="${cy}" r="${radius}" fill="#F4F7FB"/>
+        <circle cx="${cx}" cy="${cy}" r="${radius - 1}" fill="none" stroke="${accent}" stroke-opacity="0.18"/>
+        <text x="${cx}" y="${cy + Math.round(fontSize * 0.34)}"
+              text-anchor="middle" fill="${accent}" font-size="${fontSize}" font-weight="900" font-family="${font}">
+          ${label}
+        </text>
+      </g>
+    `;
+}
+
 function renderPrimaryStat(
     x: number,
     y: number,
@@ -326,7 +342,7 @@ export function renderCard(input: RenderInput) {
     <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarR + 2}" fill="none" stroke="#E5E7EB"/>
     ${hasAvatar
         ? `<image href="${input.avatarDataUri}" x="${avatarCx - avatarR}" y="${avatarCy - avatarR}" width="${avatarSize}" height="${avatarSize}" clip-path="url(#clipAvatar)" preserveAspectRatio="xMidYMid slice"/>`
-        : `<text x="${avatarCx}" y="${avatarCy + 6}" text-anchor="middle" fill="#94A3B8" font-size="18" font-weight="900" font-family="${font}">?</text>`}
+        : renderAvatarFallback(u.handle || '', avatarCx, avatarCy, avatarR, accent)}
   </g>
 
   ${badgeOverlay}
@@ -456,7 +472,7 @@ export function renderCardV2(input: RenderInput) {
     <circle cx="${avatarCx}" cy="${avatarCy}" r="${avatarR + 1}" fill="none" stroke="${accent}" stroke-opacity="0.22"/>
     ${hasAvatar
         ? `<image href="${input.avatarDataUri}" x="${avatarCx - avatarR}" y="${avatarCy - avatarR}" width="${avatarSize}" height="${avatarSize}" clip-path="url(#clipAvatarV2)" preserveAspectRatio="xMidYMid slice"/>`
-        : `<text x="${avatarCx}" y="${avatarCy + 6}" text-anchor="middle" fill="#94A3B8" font-size="18" font-weight="900" font-family="${font}">?</text>`}
+        : renderAvatarFallback(u.handle || '', avatarCx, avatarCy, avatarR, accent)}
 
     ${badgeOverlay}
     ${classOverlay}

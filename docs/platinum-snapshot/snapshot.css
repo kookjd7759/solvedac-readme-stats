@@ -74,8 +74,7 @@ input {
 
 .archive-hero,
 .archive-panel,
-.ranking-gallery,
-.memory-card {
+.ranking-gallery {
   border: 1px solid var(--line);
   box-shadow: var(--shadow-lg);
   backdrop-filter: blur(14px);
@@ -83,9 +82,7 @@ input {
 
 .archive-hero {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.72fr);
-  gap: 28px;
+  display: block;
   padding: 36px;
   border-radius: 36px;
   background:
@@ -104,8 +101,7 @@ input {
     linear-gradient(120deg, transparent 0 54%, rgba(122, 74, 34, 0.06) 54% 56%, transparent 56%);
 }
 
-.archive-copy,
-.memory-card {
+.archive-copy {
   position: relative;
   z-index: 1;
 }

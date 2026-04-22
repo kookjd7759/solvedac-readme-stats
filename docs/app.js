@@ -112,7 +112,7 @@ function syncVersionCards() {
 function buildApiUrl(handle, version, options = {}) {
   if (!handle) return "";
 
-  const { download = false, cacheBust = false, streak = false } = options;
+  const { download = false, cacheBust = false, streak = false, full = false } = options;
   const url = new URL(API_BASE);
 
   url.searchParams.set("handle", handle);
@@ -121,6 +121,10 @@ function buildApiUrl(handle, version, options = {}) {
 
   if (download) {
     url.searchParams.set("download", "1");
+  }
+
+  if (full) {
+    url.searchParams.set("full", "1");
   }
 
   if (cacheBust) {
@@ -179,13 +183,15 @@ function syncOutputPanels() {
   elements.copyUrlButton.disabled = !canCopy;
   elements.copyMarkdownButton.disabled = !canCopy;
 
-  if (!apiUrl) {
+  const openUrl = state.previewUrl || apiUrl;
+
+  if (!openUrl) {
     elements.openSvgLink.href = "#";
     elements.openSvgLink.setAttribute("aria-disabled", "true");
     return;
   }
 
-  elements.openSvgLink.href = apiUrl;
+  elements.openSvgLink.href = openUrl;
   elements.openSvgLink.removeAttribute("aria-disabled");
 }
 
@@ -204,6 +210,7 @@ function renderCard() {
   state.submittedShowStreak = state.draftShowStreak;
   state.previewUrl = buildApiUrl(nextHandle, state.draftVersion, {
     cacheBust: true,
+    full: true,
     streak: state.draftShowStreak,
   });
 
@@ -236,6 +243,7 @@ function downloadSvg() {
   const downloadUrl = buildApiUrl(state.submittedHandle, state.submittedVersion, {
     download: true,
     cacheBust: true,
+    full: true,
     streak: state.submittedShowStreak,
   });
 

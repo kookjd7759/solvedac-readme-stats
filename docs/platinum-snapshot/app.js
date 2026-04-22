@@ -112,7 +112,9 @@ async function boot() {
     const data = await response.json();
     applyLoadedData(data, "JSON 대체 로드");
   } catch (error) {
-    elements.dataSource.textContent = "저장본을 불러오지 못했습니다.";
+    if (elements.dataSource) {
+      elements.dataSource.textContent = "저장본을 불러오지 못했습니다.";
+    }
     setStatus("error");
     setMessage(`플래티넘 아카이브를 불러오지 못했습니다. (${safeErrorMessage(error)})`, true);
   }
@@ -190,7 +192,9 @@ function applyLoadedData(data, sourceKind) {
   buildRankedRecords();
 
   const userCount = state.data?.meta?.userCount || Object.keys(state.data?.users || {}).length;
-  elements.dataSource.textContent = `${SNAPSHOT_LABEL} 저장본 · ${userCount.toLocaleString()}명 · ${sourceKind}`;
+  if (elements.dataSource) {
+    elements.dataSource.textContent = `${SNAPSHOT_LABEL} 저장본 · ${userCount.toLocaleString()}명 · ${sourceKind}`;
+  }
   setStatus("ready");
   setMessage(`${SNAPSHOT_SCOPE_LABEL} 저장본이 준비되었습니다. 저장된 핸들을 입력해 카드를 다시 만들 수 있습니다.`, false);
   renderArchiveHero();
@@ -278,6 +282,7 @@ function setStatus(status) {
 }
 
 function setMessage(message, isError) {
+  if (!elements.messageCard) return;
   elements.messageCard.textContent = message;
   elements.messageCard.classList.toggle("is-error", Boolean(isError));
 }

@@ -61,6 +61,10 @@ function truthyParam(value: string | null) {
   return normalized === "1" || normalized === "true" || normalized === "yes";
 }
 
+function isSvgDataUri(value: string | null | undefined) {
+  return /^data:image\/svg\+xml(?:;|,)/i.test(String(value || ""));
+}
+
 function sanitizeFilenameSegment(value: string) {
   const normalized = value
     .trim()
@@ -608,6 +612,7 @@ export async function GET(req: Request) {
   const version = (searchParams.get("v") || "1").trim() === "2" ? "2" : "1";
   const showStreakGrass = truthyParam(searchParams.get("streak"));
   const shouldDownload = truthyParam(searchParams.get("download"));
+  const useFullAssets = shouldDownload || truthyParam(searchParams.get("full"));
   const debugMode = ["1", "true", "json"].includes(
     (searchParams.get("debug") || "").trim().toLowerCase()
   );
@@ -651,7 +656,7 @@ export async function GET(req: Request) {
     const avatarResult = preset?.profileImagePath
       ? await fetchLocalFileAsDataUri(preset.profileImagePath)
       : await fetchAssetFromCandidates(avatarSource, assetCandidatesFromRaw(avatarSource));
-    const avatarDataUri = avatarResult.dataUri;
+    let avatarDataUri = avatarResult.dataUri;
     assets.avatar = avatarResult.debug;
 
     let bgDataUri = "";
@@ -744,6 +749,12 @@ export async function GET(req: Request) {
       };
     }
 
+    if (!useFullAssets) {
+      avatarDataUri = isSvgDataUri(avatarDataUri) ? avatarDataUri : "";
+      bgDataUri = isSvgDataUri(bgDataUri) ? bgDataUri : "";
+      badgeDataUri = isSvgDataUri(badgeDataUri) ? badgeDataUri : "";
+    }
+
     if (debugMode) {
       return new Response(
         JSON.stringify(
@@ -752,6 +763,7 @@ export async function GET(req: Request) {
             preset: preset ? handle.trim().toLowerCase() : null,
             version,
             showStreakGrass,
+            useFullAssets,
             fetchedAt: new Date().toISOString(),
             assetBases: SOLVED_ASSET_BASES,
             user: u,
@@ -811,14 +823,15 @@ export async function GET(req: Request) {
     if (debugMode) {
       return new Response(
         JSON.stringify(
-          {
-            handle,
-            version,
-            showStreakGrass,
-            fetchedAt: new Date().toISOString(),
-            error: e?.message || "unknown error",
-            assetBases: SOLVED_ASSET_BASES,
-          },
+            {
+              handle,
+              version,
+              showStreakGrass,
+              useFullAssets,
+              fetchedAt: new Date().toISOString(),
+              error: e?.message || "unknown error",
+              assetBases: SOLVED_ASSET_BASES,
+            },
           null,
           2
         ),
