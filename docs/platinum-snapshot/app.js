@@ -4,6 +4,7 @@ const SNAPSHOT_SCOPE_LABEL = "백준 플래티넘 V 이상";
 const SNAPSHOT_DATA_URL = "./user_data.json";
 const SNAPSHOT_REF =
   SNAPSHOT_SEED_DATA?.meta?.ref || "88d50a0479a17fe7903477c60b3a8c0d47d30d73";
+const LOCAL_ASSET_VERSION = "20260422-0941";
 const SNAPSHOT_ASSET_BASE = `https://cdn.jsdelivr.net/gh/kookjd7759/solvedac-readme-stats@${SNAPSHOT_REF}/DB/`;
 const TIER_DATA = window.__TIER_ASSETS__ || {};
 const CLASS_DATA = window.__CLASS_ASSETS__ || {};
@@ -40,7 +41,7 @@ const EASTER_EGG_RECORD = {
   maxStreak: 0,
   profileImagePath: "./assets/0501.jpg",
   backgroundPath: "./assets/0501_back.jpg",
-  badgePath: "./assets/0501_bedge.png",
+  badgePath: `./assets/0501_bedge.png?v=${LOCAL_ASSET_VERSION}`,
 };
 
 const elements = {
@@ -512,8 +513,19 @@ async function fetchAssetAsDataUri(href) {
   if (!href) return "";
   if (String(href).startsWith("data:")) return href;
 
+  const shouldBypassHttpCache =
+    typeof window !== "undefined" &&
+    (() => {
+      try {
+        const target = new URL(href, window.location.href);
+        return target.origin === window.location.origin;
+      } catch {
+        return false;
+      }
+    })();
+
   if (!state.assetDataUriCache.has(href)) {
-    const pending = fetch(href, { cache: "force-cache" })
+    const pending = fetch(href, { cache: shouldBypassHttpCache ? "no-store" : "force-cache" })
       .then(async (response) => {
         if (!response.ok) {
           throw new Error(`이미지 자산을 불러오지 못했습니다. (${response.status})`);
