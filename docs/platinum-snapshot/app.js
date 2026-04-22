@@ -524,8 +524,22 @@ async function fetchAssetAsDataUri(href) {
       }
     })();
 
+  if (shouldBypassHttpCache) {
+    try {
+      const response = await fetch(href, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`이미지 자산을 불러오지 못했습니다. (${response.status})`);
+      }
+
+      const blob = await response.blob();
+      return blobToDataUrl(blob);
+    } catch {
+      return "";
+    }
+  }
+
   if (!state.assetDataUriCache.has(href)) {
-    const pending = fetch(href, { cache: shouldBypassHttpCache ? "no-store" : "force-cache" })
+    const pending = fetch(href, { cache: "force-cache" })
       .then(async (response) => {
         if (!response.ok) {
           throw new Error(`이미지 자산을 불러오지 못했습니다. (${response.status})`);
