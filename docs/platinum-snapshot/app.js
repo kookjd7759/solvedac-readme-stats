@@ -40,7 +40,7 @@ const EASTER_EGG_RECORD = {
   maxStreak: 0,
   profileImagePath: "./assets/0501.jpg",
   backgroundPath: "./assets/0501_back.jpg",
-  badgePath: "./assets/solves_04000.png",
+  badgePath: "./assets/0501_bedge.png",
 };
 
 const elements = {
