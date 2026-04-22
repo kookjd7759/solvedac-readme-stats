@@ -38,10 +38,9 @@ const EASTER_EGG_RECORD = {
   class: 10,
   classDecoration: "gold",
   maxStreak: 0,
-  // Opened from docs/platinum-snapshot/index.html, so ../../DB points to repo-root DB.
-  profileImagePath: "../../DB/img/profile/0501.jpg",
-  backgroundPath: "../../DB/img/background/0501_back.jpg",
-  badgePath: "../../DB/img/bedge/solves_04000.png",
+  profileImagePath: "img/profile/0501.jpg",
+  backgroundPath: "img/background/0501_back.jpg",
+  badgePath: "img/bedge/solves_04000.png",
 };
 
 const elements = {
@@ -1125,20 +1124,7 @@ function isEasterEggHandle(handle) {
   return String(handle || "").trim().toLowerCase() === EASTER_EGG_HANDLE;
 }
 
-function renderEasterEggCard() {
-  const avatarHref =
-    typeof window !== "undefined"
-      ? new URL(EASTER_EGG_RECORD.profileImagePath, window.location.href).href
-      : EASTER_EGG_RECORD.profileImagePath;
-  const bgHref =
-    typeof window !== "undefined"
-      ? new URL(EASTER_EGG_RECORD.backgroundPath, window.location.href).href
-      : EASTER_EGG_RECORD.backgroundPath;
-  const badgeHref =
-    typeof window !== "undefined"
-      ? new URL(EASTER_EGG_RECORD.badgePath, window.location.href).href
-      : EASTER_EGG_RECORD.badgePath;
-
+async function renderEasterEggCard() {
   const input = {
     user: {
       handle: EASTER_EGG_RECORD.handle,
@@ -1150,36 +1136,65 @@ function renderEasterEggCard() {
       maxStreak: EASTER_EGG_RECORD.maxStreak,
     },
     tierHref: resolveTierAssetHref(EASTER_EGG_RECORD.tier),
-    avatarHref,
-    bgHref,
-    badgeHref,
+    avatarHref: resolveAssetHref(EASTER_EGG_RECORD.profileImagePath),
+    bgHref: resolveAssetHref(EASTER_EGG_RECORD.backgroundPath),
+    badgeHref: resolveAssetHref(EASTER_EGG_RECORD.badgePath),
     classHref: resolveClassAssetHref(EASTER_EGG_RECORD.class, EASTER_EGG_RECORD.classDecoration),
     streakSummary: { currentStreak: 0, longestStreak: EASTER_EGG_RECORD.maxStreak },
     streakActivity: { dailyCounts: {}, activeDays: 0 },
   };
 
-  const svg =
-    state.draftVersion === "2"
-      ? renderCardV2({
-          ...input,
-          showStreakGrass: state.draftShowStreak,
-        })
-      : renderCard({
-          ...input,
-          showStreakGrass: state.draftShowStreak,
-        });
+  elements.downloadButton.disabled = true;
+  setStatus("loading");
+  setMessage(`${EASTER_EGG_RECORD.handle} 카드를 준비하는 중입니다...`, false);
 
-  state.submittedHandle = EASTER_EGG_RECORD.handle;
-  state.submittedVersion = state.draftVersion;
-  state.submittedShowStreak = state.draftShowStreak;
-  state.previewSvg = svg;
+  try {
+    const [tierHref, avatarHref, bgHref, badgeHref, classHref] = await Promise.all([
+      fetchAssetAsDataUri(input.tierHref),
+      fetchAssetAsDataUri(input.avatarHref),
+      fetchAssetAsDataUri(input.bgHref),
+      fetchAssetAsDataUri(input.badgeHref),
+      fetchAssetAsDataUri(input.classHref),
+    ]);
 
-  showPreview(svg);
-  updatePreviewBlob(svg);
-  syncPreviewSummary();
-  renderRankingView();
-  setStatus("preview");
-  setMessage(`${EASTER_EGG_RECORD.handle} easter egg card rendered.`, false);
+    const svg =
+      state.draftVersion === "2"
+        ? renderCardV2({
+            ...input,
+            tierHref,
+            avatarHref,
+            bgHref,
+            badgeHref,
+            classHref,
+            showStreakGrass: state.draftShowStreak,
+          })
+        : renderCard({
+            ...input,
+            tierHref,
+            avatarHref,
+            bgHref,
+            badgeHref,
+            classHref,
+            showStreakGrass: state.draftShowStreak,
+          });
+
+    state.submittedHandle = EASTER_EGG_RECORD.handle;
+    state.submittedVersion = state.draftVersion;
+    state.submittedShowStreak = state.draftShowStreak;
+    state.previewSvg = svg;
+
+    showPreview(svg);
+    updatePreviewBlob(svg);
+    syncPreviewSummary();
+    renderRankingView();
+    setStatus("preview");
+    setMessage(`${EASTER_EGG_RECORD.handle} 카드를 저장본 기준으로 렌더링했습니다.`, false);
+  } catch (error) {
+    hidePreview();
+    elements.downloadButton.disabled = true;
+    setStatus("error");
+    setMessage(`아카이브 렌더링에 실패했습니다. (${safeErrorMessage(error)})`, true);
+  }
 }
 
 async function renderLocalCard() {
@@ -1201,7 +1216,7 @@ async function renderLocalCard() {
   }
 
   if (isEasterEggHandle(handleInput)) {
-    renderEasterEggCard();
+    await renderEasterEggCard();
     return;
   }
 
