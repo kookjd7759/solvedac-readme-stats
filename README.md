@@ -17,9 +17,9 @@
   <a href="https://kookjd7759.github.io/solvedac-readme-stats/platinum-snapshot/">플래티넘 기록 보관소</a>
 </p>
 
-<img width="100%" align="center" alt="top" src="https://github.com/user-attachments/assets/785e8cb0-113b-4933-8f16-d563a2205129" />
-<img width="100%" align="center" alt="rank_1" src="https://github.com/user-attachments/assets/cc3035f3-36fa-4b0f-b8e0-f8f91247a759" />
-<img width="100%" align="center" alt="rank_2" src="https://github.com/user-attachments/assets/4cfa7a00-685f-4346-85af-adba0c39fe30" />
+<img width="100%" align="center" alt="top" src="https://github.com/user-attachments/assets/834279e5-3330-45c8-a781-16405127db53" />
+<img width="100%" align="center" alt="rank_1" src="https://github.com/user-attachments/assets/18c28dbd-c341-4474-a177-b6e9942f755a" />
+<img width="100%" align="center" alt="rank_2" src="https://github.com/user-attachments/assets/b33c5bf3-30dd-4dae-9769-4d47eb3f71a7" />
 
 ## 1. README 프로젝트
 
