@@ -38,9 +38,9 @@ const EASTER_EGG_RECORD = {
   class: 10,
   classDecoration: "gold",
   maxStreak: 0,
-  profileImagePath: "img/profile/0501.jpg",
-  backgroundPath: "img/background/0501_back.jpg",
-  badgePath: "img/bedge/solves_04000.png",
+  profileImagePath: "./assets/0501.jpg",
+  backgroundPath: "./assets/0501_back.jpg",
+  badgePath: "./assets/solves_04000.png",
 };
 
 const elements = {
@@ -488,6 +488,12 @@ function decodeStreakActivity(activity) {
 function resolveAssetHref(path) {
   if (!path) return "";
   if (/^https?:\/\//i.test(path) || String(path).startsWith("data:")) {
+    return path;
+  }
+  if (/^(\.\/|\.\.\/|\/)/.test(String(path))) {
+    if (typeof window !== "undefined") {
+      return new URL(String(path), window.location.href).href;
+    }
     return path;
   }
   return new URL(String(path), SNAPSHOT_ASSET_BASE).href;
